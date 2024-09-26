@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Ceasar Cipher
+    </title>
+    <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;word-wrap: break-word;padding:0
+10px}h1,h2,h3{line-height:1.2}</style>
+  </head>
+  <h1> Ceasar cipher </h1>
+
+  <b>key</b> <p>
+    <input type="number" name="key" id="key" value="7" oninput="do_crypto();"></input> <p>
+
+    <b>plaintext</b><p>
+    <textarea cols="80" rows="8" name="plaintext" id="plaintext" value="hello world  abcdefghijklmnopqrstuvwxyz  " oninput="do_crypto();">
+Wilhelmus van Nassouwe
+ben ik, van Duitsen bloed,
+den vaderland getrouwe
+blijf ik tot in den dood.
+Een Prinse van Oranje
+ben ik, vrij onverveerd,
+den Koning van Hispanje
+heb ik altijd geeerd.
+  </textarea> <p>
+    <b>ciphertext</b><p>
+  <p overflow-wrap="anywhere" style="font-family:'Lucida Console', monospace"  id="ciphertext">cpsolstazgbhuguhzzvaclgilugprggbhugkap_zlugisvlkggklugbhklyshukgnl_yvaclgispqmgprg_v_gpugklugkvvkggllugwypuzlgbhugvyhuqlgilugprggbypqgvublybllykggklugrvupungbhugopzwhuqlgoligprghs_pqkgnlllykgggg</p>
+    <!-- <input type="textarea" name="ciphertext" id="ciphertext" readonly></input> -->
+
+    <script>
+      function ceasar_encrypt(plaintext,key)
+      {
+          var A = "a".charCodeAt(0);
+          //plaintext = plaintext.replace(/?/g, "");
+          var ciphertext = ""
+          for(var i = 0; i < plaintext.length; i++) {
+              var c = 1 + plaintext.charCodeAt(i) - A;
+              if(c>=27 || c<1)
+                  c=0;
+              c = c+Number(key)
+              if( c<-1000 || c>1000)
+                  return "<i>error</i>"
+              while (c>=27)
+                  c-=27;
+              while (c<0)
+                  c+=27;
+              if( c==0)
+              {
+                  if (key>0)
+                      ciphertext+="_";
+                  else
+                      ciphertext+=" ";
+              }
+              else
+                  ciphertext+=String.fromCharCode(c-1+A);
+          }
+          return ciphertext
+      }
+
+      function do_crypto(){
+          var plaintext = document.getElementById("plaintext").value.toLowerCase();
+          var key       = document.getElementById("key"      ).value;
+          document.getElementById("ciphertext").innerHTML = ceasar_encrypt(plaintext,key)
+      }
+    </script>
+
+
+
+</html>

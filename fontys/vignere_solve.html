@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title> Vigenère Cipher (solver) </title>
+    <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;padding:0
+10px}h1,h2,h3{line-height:1.2}</style>
+  </head>
+  <h1> Vigenère cipher (solver)</h1>
+
+
+  <b>key length</b> <p>
+    <input type="number" name="key_len" id="key_len" value="11" oninput="do_crypto();"></input> <p>
+    <b>ciphertext</b><p>
+    <textarea cols="80" rows="8" name="ciphertext" id="ciphertext" value="hello world  abcdefghijklmnopqrstuvwxyz  " oninput="do_crypto();"></textarea> <p>
+    <b>key</b><p>
+    <p style="font-family:'Lucida Console', monospace" id="key_guess"></p>
+    <b>plaintext</b><p>
+    <p style="font-family:'Lucida Console', monospace" id="plaintext"></p>
+
+    <script>
+      function vignere_decrypt(plaintext,key)
+      {
+          var A = "a".charCodeAt(0);
+          var ciphertext = ""
+          for(var i = 0; i < plaintext.length; i++) {
+              var j = (key.length+i)%key.length;
+              var c = 1 + plaintext.charCodeAt(i) - A;
+              var k = 1 + key.charCodeAt(j) - A;
+              if(c>=27 || c<1)
+                  c=0;
+              if(k>=27 || k<1)
+                  k=0;
+
+              c=(c+27+27-k)%27;
+              //c=(c+27+k)%27;
+
+              if( c==0)
+                  ciphertext+=" ";
+              else
+                  ciphertext+=String.fromCharCode(c-1+A);
+          }
+          return ciphertext
+      }
+
+      function plaintext_score(plaintext)
+      {
+          var score = 0;
+          for(var i = 0;i<plaintext.length;i++)
+          {
+              if(plaintext.charAt(i)=='e') score+=1/plaintext.length;
+              if(plaintext.charAt(i)==' ') score+=1/plaintext.length;
+              if(plaintext.charAt(i)=='x') score-=1/plaintext.length;
+              if(plaintext.charAt(i)=='y') score-=1/plaintext.length;
+              if(plaintext.charAt(i)=='q') score-=1/plaintext.length;
+          }
+          return score
+      }
+
+      function do_crypto(){
+          var ciphertext = document.getElementById("ciphertext").value.toLowerCase();
+          var key_len = Number(document.getElementById("key_len").value);
+          var key="";
+          for(var k=0;k<key_len && k<100;k++)
+          {
+              var best_score=-9999;
+              var best_kc="?";
+              var ciph_input=""
+              for(var j=k;j<ciphertext.length;j+=key_len)
+              {
+                  ciph_input+=ciphertext.charAt(j);
+              }
+              // console.log(ciph_input)
+              for(var c=0;c<=26;c++)
+              {
+                  if(c==0)
+                      kc="-"
+                  else
+                      kc=String.fromCharCode(c-1+"a".charCodeAt(0));
+                  // console.log(kc)
+                  // console.log(vignere_decrypt(ciph_input,kc))
+                  score=plaintext_score(vignere_decrypt(ciph_input,kc))
+                  // console.log("score: "+kc+"->"+score)
+                  if(score>best_score)
+                  {
+                      best_score=score
+                      best_kc=kc
+                  }
+              }
+              key+=best_kc;
+          }
+          key=document.getElementById("key_guess").innerHTML = key;
+          // console.log(key);
+          // console.log(vignere_decrypt(ciphertext,key));
+          document.getElementById("plaintext").innerHTML = vignere_decrypt(ciphertext,key);
+      }
+    </script>
+
+</html>

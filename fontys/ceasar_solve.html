@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+      Ceasar Cipher (solver)
+    </title>
+    <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;word-wrap: break-word;padding:0
+10px}h1,h2,h3{line-height:1.2}</style>
+  </head>
+  <h1> Ceasar cipher (solver)</h1>
+
+  <b>ciphertext</b><p>
+    <textarea cols="80" rows="5" name="plaintext" id="plaintext" value="hello world  abcdefghijklmnopqrstuvwxyz  " oninput="do_crypto();"></textarea> <p>
+    <b>Best plaintext guess</b><p>
+    <p id="bestplaintext"></p>
+    <b>Possible plaintexts</b><p>
+    <p style="font-family:'Lucida Console', monospace" id="ciphertext"></p>
+    <!-- <input type="textarea" name="ciphertext" id="ciphertext" readonly></input> -->
+
+    <script>
+      function ceasar_encrypt(plaintext,key)
+      {
+          var A = "a".charCodeAt(0);
+          var ciphertext = ""
+          for(var i = 0; i < plaintext.length; i++) {
+              var c = 1 + plaintext.charCodeAt(i) - A;
+              if(c>=27 || c<1)
+                  c=0;
+              c = c-key
+              if( c<-1000 || c>1000)
+                  return "<i>error</i>"
+              while (c>=27)
+                  c-=27;
+              while (c<0)
+                  c+=27;
+              if( c==0)
+                  ciphertext+=" ";
+              else
+                  ciphertext+=String.fromCharCode(c-1+A);
+          }
+          return ciphertext
+      }
+
+      function plaintext_score(plaintext)
+      {
+          var score = 0;
+          for(var i = 0;i<plaintext.length;i++)
+          {
+              if(plaintext.charAt(i)=='e') score+=1/plaintext.length;
+              if(plaintext.charAt(i)==' ') score+=1/plaintext.length;
+              if(plaintext.charAt(i)=='x') score-=1/plaintext.length;
+              if(plaintext.charAt(i)=='y') score-=1/plaintext.length;
+              if(plaintext.charAt(i)=='q') score-=1/plaintext.length;
+          }
+          return score
+      }
+
+      function do_crypto(){
+          var plaintext = document.getElementById("plaintext").value.toLowerCase();
+          var table = ''
+          var best_score=-999;
+          for(var key=0;key<27;key++)
+          {
+              result = ceasar_encrypt(plaintext,key);
+              score = plaintext_score(result);
+
+              table+='<u>key = '+key+'</u><p>';
+              if(score>best_score)
+              {
+                  best_score=score;
+                  document.getElementById("bestplaintext").innerHTML = result;
+              }
+              if(score > 0.2)
+                  table += "<font color=green>"+result+"</font>"
+              else if(score > 0.1)
+                  table += "<font color=blue>"+result+"</font>"
+              else
+                  table += "<font color=red>"+result+"</font>"
+              table+='<p>';
+          }
+          document.getElementById("ciphertext").innerHTML = table;
+      }
+    </script>
+
+
+
+</html>
