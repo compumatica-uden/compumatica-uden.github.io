@@ -5,12 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
     <title>
-      Ceasar Cipher
+      Caesar Cipher
     </title>
     <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;word-wrap: break-word;padding:0
 10px}h1,h2,h3{line-height:1.2}</style>
   </head>
-  <h1> Ceasar cipher </h1>
+  <h1> Caesar cipher </h1>
 
   <b>key</b> <p>
     <input type="number" name="key" id="key" value="3" oninput="do_crypto();"></input> <p>
@@ -28,7 +28,7 @@ Ik stond er bij en ik keek er naar</textarea> <p>
     <!-- <input type="textarea" name="ciphertext" id="ciphertext" readonly></input> -->
 
     <script>
-      function ceasar_encrypt(plaintext,key)
+      function caesar_encrypt(plaintext,key)
       {
           var A = "a".charCodeAt(0);
           //plaintext = plaintext.replace(/?/g, "");
@@ -60,7 +60,7 @@ Ik stond er bij en ik keek er naar</textarea> <p>
       function do_crypto(){
           var plaintext = document.getElementById("plaintext").value.toLowerCase();
           var key       = document.getElementById("key"      ).value;
-          document.getElementById("ciphertext").innerHTML = ceasar_encrypt(plaintext,key)
+          document.getElementById("ciphertext").innerHTML = caesar_encrypt(plaintext,key)
       }
     </script>
 

@@ -5,12 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
     <title>
-      Ceasar Cipher (solver)
+      Caesar Cipher (solver)
     </title>
     <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;word-wrap: break-word;padding:0
 10px}h1,h2,h3{line-height:1.2}</style>
   </head>
-  <h1> Ceasar cipher (solver)</h1>
+  <h1> Caesar cipher (solver)</h1>
 
   <b>ciphertext</b><p>
     <textarea cols="80" rows="5" name="plaintext" id="plaintext" value="hello world  abcdefghijklmnopqrstuvwxyz  " oninput="do_crypto();"></textarea> <p>
@@ -21,7 +21,7 @@
     <!-- <input type="textarea" name="ciphertext" id="ciphertext" readonly></input> -->
 
     <script>
-      function ceasar_encrypt(plaintext,key)
+      function caesar_encrypt(plaintext,key)
       {
           var A = "a".charCodeAt(0);
           var ciphertext = ""
@@ -64,7 +64,7 @@
           var best_score=-999;
           for(var key=0;key<27;key++)
           {
-              result = ceasar_encrypt(plaintext,key);
+              result = caesar_encrypt(plaintext,key);
               score = plaintext_score(result);
 
               table+='<u>key = '+key+'</u><p>';
