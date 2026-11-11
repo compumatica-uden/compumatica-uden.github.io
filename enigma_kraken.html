@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Hoe kraak je een Enigma? — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a class="active" href="enigma.html">Enigma</a>
+        <a href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Hoe kraak je een Enigma?</h1>
+      <p>
+        De Enigma had een sleutelruimte die met brute force onbereikbaar leek —
+        en toch werd ze systematisch gekraakt. Dit is hoe, in vier stappen:
+        eerst de eigenschappen die je gratis geeft, dan de sleutelruimte,
+        dan brute force, en tenslotte de slimme aanpak van de cryptanalysten.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">1 · Twee eigenschappen die je gratis geven</h3>
+      <p>
+        Door de <b>reflector</b> heeft de Enigma twee eigenschappen die je als aanvaller
+        direct kunt gebruiken (test het zelf in de <a href="enigma.html">simulator</a>):
+      </p>
+      <ul style="line-height:1.9">
+        <li><b>Reciproce:</b> met dezelfde instellingen versleutelen = ontsleutelen. Wie de instellingen kent, is er.</li>
+        <li><b>Een letter wordt nooit door zichzelf gecodeerd.</b> In het ciphertext staat op elke positie een letter die <i>niet</i> gelijk is aan de plaintext-letter op die positie.</li>
+      </ul>
+      <p>
+        Die tweede eigenschap is goud waard: als je een <i>gok</i> hebt over wat er op een
+        bepaalde plek staat, dan is die gok op elke plek waar ciphertext-letter = plaintext-letter
+        <b>direct afgevallen</b> — zonder één berekening.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">2 · Hoe groot is de sleutelruimte?</h3>
+      <p>Alleen al de <b>startposities</b> (de machine staat 's ochtends op een willekeurige stand):</p>
+      <table>
+        <thead><tr><th>rotors</th><th>startposities</th><th>brute force in de browser</th></tr></thead>
+        <tbody>
+          <tr><td>1 rotor</td><td class="mono">26</td><td>handmatig in een minuut</td></tr>
+          <tr><td>3 rotors</td><td class="mono">17.576</td><td>enkele seconden (<a href="solver_enigma.html">solver</a>)</td></tr>
+          <tr><td>5 rotors</td><td class="mono">11.881.376</td><td>inhaalbaar</td></tr>
+        </tbody>
+      </table>
+      <p style="color:var(--muted);font-size:14px">
+        En dat is <b>nog</b> zonder: ring-instellingen (26 per rotor), de volgorde van de rotors,
+        en het stekkerbord — 10 paarletters geven al ≈ 37 miljard extra combinaties.
+        De echte Enigma I: ruim <b>10²⁰</b> mogelijkheden.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">3 · Brute force: wanneer lukt dat?</h3>
+      <p>
+        Met <b>beperkte onbekenden</b> wint brute force nog: de Enigma-uitdagingen tonen het
+        spectrum. Bij <a href="enigma.html#uitdaging1">1 rotor</a> probeer je 26 starts af
+        (met de <a href="solver_enigma.html">solver</a> of met het oog), bij
+        <a href="enigma.html#uitdaging3">3 rotors</a> doet de solver 17.576 combinaties in
+        seconden. Bij <a href="enigma.html#uitdaging5">5 rotors</a> staakt de solver —
+        26⁵ en meer is voor een simpele aanpak te veel.
+      </p>
+      <p>
+        Conclusie: als je <i>alle</i> instellingen behalve de starts weet (bijv. uit een
+        gelekte sleutelkaart), is de Enigma kwetsbaar. Dat was in het echte leven zelden zo.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-top:0">4 · Hoe het écht werd gekraakt</h3>
+      <p>De Enigma viel niet op brute force, maar op <b>wiskunde + procedures + rekenkracht</b>:</p>
+
+      <div class="task" style="margin-top:12px">
+        <h3 style="font-size:16px">a) Menselijke fouten eerst</h3>
+        <p style="margin:0">
+          De Duitsers maakten proceduresfouten: herhaalde boodschappen-headers
+          (<span class="mono">AAAA…</span> in de plaintext), dezelfde boodschapsleutel
+          twee keer gebruiken, en voorspelbare openingen. Elke fout verkleint
+          de zoekruimte flink — <b>de zwakste schakel is bijna altijd de mens</b>.
+        </p>
+      </div>
+
+      <div class="task" style="margin-top:12px">
+        <h3 style="font-size:16px">b) De crib: bekende tekst</h3>
+        <p style="margin:0">
+          Men kende fragmenten van veel boodschappen: de dagelijkse weerbericht
+          begon vrijwel altijd met <span class="mono">WETTERVORHERSAGE…</span>.
+          Zo'n fragment noem je een <b>crib</b>.
+        </p>
+      </div>
+
+      <div class="task" style="margin-top:12px">
+        <h3 style="font-size:16px">c) Crib uitlijnen met de "no-self" regel</h3>
+        <p style="margin:0">
+          Schuif de crib langs het ciphertext. Op elke uitlijning waar
+          een crib-letter <i>gelijk</i> is aan de ciphertext-letter op die plek,
+          valt die uitlijning af (eigenschap 2). Voor
+          <span class="mono">WETTERVORHERSAGE</span> overlevt vaak slechts een
+          handvol posities.
+        </p>
+      </div>
+
+      <div class="task" style="margin-top:12px">
+        <h3 style="font-size:16px">d) Cillies: vingerafdrukken van herhaling</h3>
+        <p style="margin:0">
+          Letterherhaling in de plaintext (bijv. <span class="mono">TT</span> in WET<b>TT</b>ER)
+          verschijnt in het ciphertext als twee <i>gelijke</i> letters op dezelfde afstand
+          (de rotorstand keert na 26×26×… letters terug op het pad) — een zogenaamde
+          <b>cilly</b>. De positie en afstanden van cillies bevestigen de crib-uitlijning
+          en geven direct info over de rotorstanden.
+        </p>
+      </div>
+
+      <div class="task" style="margin-top:12px">
+        <h3 style="font-size:16px">e) De bombe: hypotheses afrekenen</h3>
+        <p style="margin:0">
+          Voor elke overgebleven uitlijning en elke kandidaat-startstand bouwt de
+          <b>bombe</b> (een elektro-mechanische machine, vernoemd naar een Soedanese
+          cocktail) een "ketting" van logische tegenstrijdigheden. De juiste rotorinstelling
+          valt weg, de fouten lopen door — duizenden hypotheses per uur, dagenlang.
+        </p>
+      </div>
+
+      <p style="margin-top:14px">
+        De historische volgorde: de Poolse wiskundigen <b>Rejewski, Różycki en Zygalski</b>
+        kraakten de basis-Enigma al in 1932 (permutatietheorie + de "bomba" +
+        Zygalski-bladen). In 1939 deelden ze hun werk met de Britten en Fransen;
+        in 1940 brak <b>Turing</b> en <b>Welchman</b> met de eerste <i>bombe</i> in
+        Bletchley Park (Hut 8) de sterkere Duitse versie open.
+      </p>
+    </div>
+
+    <div class="hint">
+      <h4>🎓 De les hierachter</h4>
+      <p style="margin:0">
+        Het ciphersysteem zelf was wiskundig best sterk; het viel door
+        <b>beperkte sleutelkeuzes in de praktijk</b> (procedures), <b>structurele eigenschappen</b>
+        (de reflector!) en <b>geciblede wiskunde + computation</b> (crib → bombe).
+        Moderne cryptografie (AES) leert daarvan: enorme sleutelruimte,
+        geen handige structurele eigenschappen, en geen voorspelbare procedures.
+      </p>
+    </div>
+
+    <div class="divider"></div>
+    <p style="color:var(--muted)">
+      Probeer het zelf: <a href="enigma.html#uitdaging1">Enigma 1</a> ·
+      <a href="enigma.html#uitdaging3">Enigma 3</a> ·
+      <a href="enigma.html#uitdaging5">Enigma 5</a> ·
+      <a href="solvers.html">alle solvers</a>
+    </p>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">enigma · cryptanalyse</span>
+  </div>
+</body>
+</html>

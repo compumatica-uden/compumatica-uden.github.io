@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Caesar-cijfer — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a class="active" href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Caesar-cijfer</h1>
+      <p>
+        Elk lettertje wordt verschoven met dezelfde sleutel <span class="mono">k</span>.
+        Sleutel 3: <span class="mono">a→d</span>, <span class="mono">b→e</span>, …
+        Spaties worden bij versleutelen <span class="mono">_</span> en bij ontsleutelen een spatie.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="grow" style="max-width:340px">
+          <label class="lbl" for="key">Sleutel <span class="mono" id="keylabel" style="color:var(--accent)">k = 3</span></label>
+          <input type="range" id="key" min="-26" max="26" value="3" oninput="sync_key(this); do_crypto();">
+        </div>
+        <div>
+          <label class="lbl" for="mode">Richting</label>
+          <select id="mode" class="btn ghost" onchange="do_crypto()" style="font-family:var(--mono)">
+            <option value="enc">versleutelen</option>
+            <option value="dec">ontsleutelen</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="background:var(--panel2);margin:14px 0 0">
+        <div class="railviz" id="alphabet" style="margin:0"></div>
+        <p style="color:var(--muted);font-size:13px;margin:8px 0 0">
+          Bovenaan de 27 symbolen (a–z en <span class="mono">␣</span> = de spatie), daaronder het resultaat van de verschuiving.
+          <span class="mono" style="color:var(--accent)">a→d</span> betekent dat <span class="mono">a</span> wordt gecodeerd als <span class="mono">d</span>.
+          De spatie verschuift mee: letters kunnen op <span class="mono">␣</span> uitkomen en omgekeerd —
+          in de tekst verschijnt <span class="mono">␣</span> bij versleutelen als <span class="mono">_</span> en bij ontsleutelen als spatie.
+        </p>
+      </div>
+
+      <label class="lbl" for="plaintext">Tekst</label>
+      <textarea cols="40" rows="8" id="plaintext" oninput="do_crypto();">Berend Botje ging uit varen
+met zijn scheepje naar Zuidlaren.
+De weg was recht,
+de weg was krom,
+nooit kwam Berend Botje weerom.
+Een, twee, drie, vier, vijf, zes, zeven,
+waar is Berend Botje gebleven?
+Hij is niet hier, hij is niet daar,
+hij is naar Amerika.
+Amerika, Amerika,
+driemaal in de rondte van je hopsasa!</textarea>
+
+      <label class="lbl" for="ciphertext">Resultaat</label>
+      <div class="outbox" id="ciphertext"></div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_out()">⧉ Kopieer resultaat</button>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Opgave</h3>
+      <p>
+        Versleutel <span class="mono">VOORBEELD</span> met sleutel <span class="mono">1</span>.
+        Krijg je <span class="mono">WPPSCFFME</span>?
+        <b>ROT13</b> (sleutel <span class="mono">13</span>) is in mod 26 zijn eigen inverse:
+        13 + 13 = 26 ≡ 0. Maar wij werken in mod 27 — probeer het zelf:
+        versleutel <span class="mono">VOORBEELD</span> met 13, en het resultaat <i>opnieuw</i> met 13.
+        Ben je terug bij het begin?
+      </p>
+      <details>
+        <summary>Oplossing</summary>
+        <div class="body solution">
+          Sleutel 1: <span class="ans">WPPSCFFME</span>.
+          Eén keer 13: <span class="ans">haadorryq</span>. Nogmaals 13: <span class="ans">unnqaddkc</span> —
+          dat is <span class="mono">VOORBEELD</span> met <b>−1</b> verschoven, niet met 0!
+          In mod 27 geldt 13 + 13 = 26 ≡ −1 ≠ 0: in een oneven cirkel is er geen “halve” rotatie.
+        </div>
+      </details>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="task" id="uitdaging">
+      <h3>🎯 Uitdaging · Caesar kraken <span class="badge easy">basis</span></h3>
+      <p>
+        Iemand stuurde je een boodschap die gecodeerd is met het Caesar-cijfer.
+        Ontcijfer deze ciphertext (sleutel onbekend):
+      </p>
+      <p class="mono" style="font-size:20px;letter-spacing:2px;margin:10px 0">GTGTGY</p>
+      <p>Welk woord zit er achter, en met welke sleutel is het gecodeerd?</p>
+    </div>
+
+    <div class="hint">
+      <h4>💡 Hint 1</h4>
+      <p style="margin:0">Het is een <b>fruit</b>. Het is een kort woord (6 letters, geen spatie).</p>
+    </div>
+    <details>
+      <summary>Hint 2 — patronen herkennen</summary>
+      <div class="body">
+        <p>
+          Kijk naar het <b>patroon</b> in <span class="mono">GTGTGY</span>:
+          <span class="mono">G T G T G Y</span> → positie 1, 3 en 5 zijn dezelfde letter.
+          Het woord heeft dus het patroon <span class="mono">L1&nbsp;L2&nbsp;L1&nbsp;L2&nbsp;L1&nbsp;L3</span>.
+          Bij een Caesar-cijfer blijft zo'n patroon behouden (alle letters verschuiven evenver).
+        </p>
+      </div>
+    </details>
+    <details>
+      <summary>Hint 3 — het is kort</summary>
+      <div class="body">
+        <p>
+          Met slechts 6 letters zegt frequentie-analyse weinig (er zit bijvoorbeeld geen
+          <span class="mono">e</span> in). Win je hier met het <b>oog</b> en met de hints,
+          niet met een score.
+        </p>
+      </div>
+    </details>
+
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin-top:0">🛠️ Hiermee aan de slag</h3>
+      <ul style="margin:8px 0 0;padding-left:20px;line-height:2">
+        <li>De <b>Caesar-tool hierboven</b> — probeer versleutelen/ontsleutelen met sleutels −26 t/m 26 af</li>
+        <li><a href="frequency.html">Letterfrequentie</a> — voor als je meer ciphertext zou hebben</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <a href="frequency.html">Frequentie</a>
+  </div>
+
+  <script>
+    var ALPHA = "abcdefghijklmnopqrstuvwxyz";
+
+    function sync_key(el){
+      document.getElementById("keylabel").innerHTML = "k = " + el.value;
+    }
+
+    function caesar_transform(text, k, decrypt){
+      var A = "a".charCodeAt(0);
+      var out = "";
+      for (var i = 0; i < text.length; i++){
+        var c = 1 + text.charCodeAt(i) - A;
+        if (c >= 27 || c < 1) c = 0;           // niet-letter (spatie, _ …)
+        c = c + (decrypt ? -k : k);
+        while (c >= 27) c -= 27;
+        while (c < 0)  c += 27;
+        out += (c === 0) ? (decrypt ? " " : "_") : String.fromCharCode(c - 1 + A);
+      }
+      return out;
+    }
+
+    /* teken de 27 symbolen (a–z en de spatie ␣) en hun verschuiving mod 27 */
+    function draw_alphabet(){
+      var k = Number(document.getElementById("key").value);
+      var decrypt = document.getElementById("mode").value === "dec";
+      k = ((k % 27) + 27) % 27;                // negatieve sleutel → equivalente mod-27-sleutel
+      if (decrypt) k = (27 - k) % 27;          // bij ontsleutelen is de zichtbare verschuiving omgekeerd
+      var A = "a".charCodeAt(0);
+      var sym = function(v){                   // v: 0 = spatie, 1..26 = a..z
+        return v === 0 ? "␣" : String.fromCharCode(v - 1 + A);
+      };
+      var top = "", bot = "";
+      for (var v = 1; v <= 26; v++) top += sym(v) + " ";
+      top += sym(0) + " ";                     // 27e symbool: de spatie
+      for (var v2 = 1; v2 <= 26; v2++) bot += sym((v2 + k) % 27) + " ";
+      bot += sym(k % 27) + " ";                // spatie + k (mod 27)
+      document.getElementById("alphabet").innerHTML =
+        '<span class="rail"><span class="lbl"></span>' + top + '</span>' +
+        '<span class="rail"><span class="lbl"></span><span class="on">' + bot + '</span></span>';
+    }
+
+    function do_crypto(){
+      var text = document.getElementById("plaintext").value.toLowerCase();
+      var k = ((Number(document.getElementById("key").value) % 27) + 27) % 27;
+      var decrypt = document.getElementById("mode").value === "dec";
+      draw_alphabet();
+      document.getElementById("ciphertext").textContent =
+        text.trim() === "" ? "" : caesar_transform(text, k, decrypt);
+    }
+
+    function copy_out(){
+      var t = document.getElementById("ciphertext").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+
+    do_crypto();
+  </script>
+</body>
+</html>

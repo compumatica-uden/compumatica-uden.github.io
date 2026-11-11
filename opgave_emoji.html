@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Opgave · Emoji-cijfer — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a class="active" href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Opgave · Emoji-cijfer <span class="badge hard">voor thuis</span></h1>
+      <p>
+        Een <b>vervanging-cijfer</b>: elke emoji staat voor precies één teken
+        (letter of <span class="mono">_</span>), en omgekeerd.
+        Geen sleutel, geen formule — alleen je hersens en een beetje
+        frequentie-analyse.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Voorbeeld</h3>
+      <p style="margin:4px 0">
+        <span class="mono" style="font-size:18px;letter-spacing:.15em">
+          🦅🐨🦆🐹🐶🐻🐨🐸🐻🪱🦉🐵🐵🐦🪱🦆🐼🦅🐨🐤
+        </span>
+      </p>
+      <p class="emoji-letters" style="margin:0">u i t d a g i n g _ v o o r _ t h u i s</p>
+      <p style="color:var(--muted);font-size:14px;margin:8px 0 0">
+        De worm <span style="font-size:18px">🪱</span> staat voor <span class="mono">_</span>
+        (een "spatie").
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>De uitdaging</h3>
+      <label class="lbl" for="ct">De uitdaging (72 emoji's — kopieerbaar)</label>
+      <div class="emoji-block" id="ct">🦇🐰🦆🐰🐸🐤🐭🐼🐶🐔🐔🐰🐦🐤🪱🦉🐰🐦🐱🐰🐦🐻🐰🐸🪱🐹🐰🪱🦇🐶🐶🐦🐼🐰🐨🐹🪱🐹🐰🪱🐶🐶🐦🐹🐰🪱🐨🐤🪱🐸🐨🐰🦆🪱🐦🐵🐸🐹🪱🐷🐶🐶🐦🪱🦉🐨🐰🐦🦁🐶🐸🦆</div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_ct()">⧉ Kopieer</button>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Hoe pak je dit aan?</h3>
+      <details>
+        <summary>Stap 1 · tellen</summary>
+        <div class="body">
+          <p style="margin:0">
+            Maak een lijst van alle <b>verschillende</b> emoji's en tellen hoe vaak
+            elke voorkomt. (Kopieer de tekst, sorteer op teken in je favoriete
+            teksteditor of Python: <span class="mono">Counter(tekst).most_common()</span>.)
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>Stap 2 · frequentie-analyse</summary>
+        <div class="body">
+          <p style="margin:0">
+            De meest voorkomende emoji's zijn de meest voorkomende letters
+            in het Nederlands: eerst <span class="mono">e</span> en
+            <span class="mono">n</span> (naast spatie's/onderstrepingen).
+            De zeldzaamste emoji's zijn kandidaten voor
+            <span class="mono">x</span>, <span class="mono">z</span>, <span class="mono">j</span>…
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>Stap 3 · patronen</summary>
+        <div class="body">
+          <p style="margin:0">
+            Gebruik de woordvormen. Zo'n 4-letterige blok
+            <span class="mono">? ? t ?</span> met een dubbele letter op de juiste
+            plaats, of eindigingen op <span class="mono">-en</span>,
+            <span class="mono">-aar</span>, <span class="mono">-ers</span>:
+            vul in wat past en laat de rest volgen.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin-top:0">🛠️ Hiermee aan de slag</h3>
+      <ul style="margin:8px 0 0;padding-left:20px;line-height:2">
+        <li><a href="frequency.html">Letterfrequentie</a> — plak je (gedeeltelijke) letter-vertaling en vergelijk met Nederlands</li>
+        <li>Elke andere tool op deze site werkt <b>niet</b> op dit cijfer — dit is pure handwerk- en hersenencrypto</li>
+      </ul>
+    </div>
+
+    <div class="divider"></div>
+    <p>
+    </p>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">vervanging-cijfer · frequentie-analyse</span>
+  </div>
+
+  <script>
+    function copy_ct(){
+      var t = document.getElementById("ct").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+  </script>
+</body>
+</html>

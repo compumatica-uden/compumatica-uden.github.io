@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oplossing: Emoji-uitdaging — Compumatica Crypto</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="warn">
+      <p><strong>🔒</strong> Deze oplossing staat opzettelijk
+      <strong>niet</strong> gelinkt vanaf de website. Deze URL is alleen bekend van tevoren.</p>
+    </div>
+
+    <h1>Oplossing: Emoji-uitdaging</h1>
+
+    <div class="card">
+      <div class="solution">
+        <p style="margin:0 0 8px">Het bericht:</p>
+        <p style="margin:0;font-size:17px;letter-spacing:.5px"><span class="ans">WETENSCHAPPERS VERBERGEN DE WAARHEID: DE AARDE IS NIET ROND, MAAR VIERKANT</span></p>
+      </div>
+      <p class="muted" style="margin-top:14px">
+        Een plat-aarde-conspiratie als grap: een “verborgen boodschap” is precies waar
+        cryptografie over gaat. 🙂
+      </p>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <p style="margin:0 0 8px"><strong>De volledige mapping (19 emoji's):</strong></p>
+      <table style="width:100%;border-collapse:collapse;font-size:15px;line-height:2.1">
+        <tr>
+          <td>🦅=U</td><td>🐨=I</td><td>🦆=T</td><td>🐹=D</td><td>🐶=A</td><td>🐻=G</td><td>🐸=N</td>
+        </tr>
+        <tr>
+          <td>🪱=_</td><td>🦉=V</td><td>🐵=O</td><td>🐦=R</td><td>🐼=H</td><td>🐤=S</td>
+          <td class="muted">(uit het voorbeeld)</td>
+        </tr>
+        <tr>
+          <td>🐰=E</td><td>🦇=W</td><td>🐭=C</td><td>🐔=P</td><td>🐱=B</td><td>🐷=M</td><td>🦁=K</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <p style="margin:0 0 8px"><strong>Zo los je het op (zelfde stappen als de hints op de opgave):</strong></p>
+      <ol style="margin:0;padding-left:20px;line-height:1.9">
+        <li><b>Tellen</b> — 🐰 komt 12× voor (veruit het vaakst) → <span class="mono">e</span> of <span class="mono">n</span>;
+            🦇 en 🐔 komen 2× voor; 🐭, 🐱, 🐷, 🦁 elk 1×.</li>
+        <li><b>Frequentie</b> — de 12× voorkomende emoji is de <span class="mono">e</span>
+            (de <span class="mono">n</span> zit al vast: 🐸 uit het voorbeeld).
+            🐰 = <span class="mono">e</span> legt meteen een halve zin vast:
+            <span class="mono">…T_eNS…</span>, <span class="mono">VeR_eRGeN</span>,
+            <span class="mono">_e…AARHe_e…</span>.</li>
+        <li><b>Patronen</b> — <span class="mono">?eNS?AP?ERS</span> →
+            <span class="ans">WETENSCHAPPERS</span>; <span class="mono">VeR?eRGen</span> →
+            <span class="ans">VERBERGEN</span> (🐱=b); <span class="mono">?AARHEID</span> →
+            <span class="ans">WAARHEID</span> (🦇=w); <span class="mono">?AAR</span> →
+            <span class="ans">MAAR</span> (🐷=m); <span class="mono">VIER?ANT</span> →
+            <span class="ans">VIERKANT</span> (🦁=k).</li>
+      </ol>
+    </div>
+
+    <p class="muted" style="margin-top:24px">
+      <a href="oplossingen.html">← Alle oplossingen (overzicht)</a>
+      &nbsp;·&nbsp;
+      <a href="opgave_emoji.html">Terug naar de opgave</a>
+    </p>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <a href="oplossingen.html">Oplossingen</a>
+  </div>
+</body>
+</html>

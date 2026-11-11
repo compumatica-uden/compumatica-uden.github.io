@@ -1,0 +1,269 @@
+/* Compumatica · crypto-analyse — gedeelde styling (PPTX-look) */
+:root{
+  --bg:#ffffff;
+  --bg2:#f5f7fa;
+  --panel:#ffffff;
+  --panel2:#f2f5f9;
+  --border:#d9e1ea;
+  --border2:#b9c6d6;
+  --text:#17222e;
+  --muted:#5c6b7f;
+  --navy:#050d18;
+  --accent:#083e5d;
+  --accent-soft:rgba(8,62,93,.08);
+  --accent-border:rgba(8,62,93,.35);
+  --red:#de0333;
+  --red-soft:rgba(222,3,51,.07);
+  --good:#059669;
+  --good-soft:rgba(5,150,105,.10);
+  --ok:#2563eb;
+  --bad:#de0333;
+  --bad-soft:rgba(222,3,51,.08);
+  --warn:#b45309;
+  --warn-soft:rgba(217,119,6,.10);
+  --mono:ui-monospace,"Cascadia Code","JetBrains Mono",Consolas,"DejaVu Sans Mono",monospace;
+  --sans:Arial,Helvetica,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.55;
+  font-size:16.5px;
+}
+/* ---------- topbar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.topbar .inner{
+  max-width:960px;margin:0 auto;padding:10px 20px;
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+}
+.logo{text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+.logo img{height:34px;width:auto;display:block}
+.logo small{color:var(--muted);font-weight:500}
+.topbar nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.topbar nav a{
+  color:var(--muted);text-decoration:none;font-size:14px;
+  padding:6px 10px;border-radius:8px;
+}
+.topbar nav a:hover{color:var(--accent);background:var(--accent-soft)}
+.topbar nav a.active{color:var(--accent);background:var(--accent-soft);font-weight:600}
+/* ---------- layout ---------- */
+.wrap{max-width:960px;margin:0 auto;padding:26px 20px 60px}
+.hero{padding:22px 0 8px}
+.hero h1{
+  margin:0 0 10px;font-size:32px;line-height:1.15;letter-spacing:-.3px;
+  color:var(--text);
+}
+.hero h1 .grad{color:var(--red)}
+.hero p{color:var(--muted);max-width:660px;margin:0}
+/* donkere titel-slide (zoals slide 1 van de presentatie) */
+.hero-slide{
+  background:#04101e url("hero_plexus.jpeg") left center / cover no-repeat;
+  color:#fff;
+  padding:64px 20px 56px;
+  border-bottom:4px solid var(--red);
+}
+.hero-slide .inner{max-width:960px;margin:0 auto;padding:0 20px}
+.hero-slide h1{
+  margin:0 0 12px;font-size:40px;line-height:1.12;letter-spacing:-.5px;color:#fff;
+}
+.hero-slide p{color:#b9c9d9;max-width:620px;margin:0}
+h2{font-size:22px;margin:34px 0 12px;letter-spacing:-.2px;color:var(--text)}
+h3{font-size:17px;margin:18px 0 8px}
+p{margin:10px 0}
+a{color:var(--accent)}
+.mono{font-family:var(--mono)}
+/* ---------- cards ---------- */
+.card{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 1px 3px rgba(8,62,93,.05);
+  padding:18px 20px;
+  margin:14px 0;
+}
+.card h3{margin-top:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin:14px 0}
+.tile{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 1px 3px rgba(8,62,93,.05);
+  padding:16px 18px;
+  text-decoration:none;color:var(--text);
+  display:block;
+  transition:transform .12s ease,border-color .12s ease;
+}
+.tile:hover{transform:translateY(-2px);border-color:var(--accent-border)}
+.tile .t{font-weight:700;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tile .d{color:var(--muted);font-size:14px;margin-top:6px;line-height:1.45}
+.tile .arrow{float:right;color:var(--muted)}
+/* badges */
+.badge{
+  display:inline-block;font-size:11.5px;font-weight:600;letter-spacing:.3px;
+  padding:2px 9px;border-radius:999px;border:1px solid var(--border2);
+  color:var(--muted);vertical-align:middle;margin-left:6px;
+}
+.badge.easy{color:var(--good);border-color:rgba(5,150,105,.4);background:var(--good-soft)}
+.badge.hard{color:var(--warn);border-color:rgba(217,119,6,.45);background:var(--warn-soft)}
+.badge.tool{color:var(--accent);border-color:var(--accent-border);background:var(--accent-soft)}
+.badge.bonus{color:var(--red);border-color:rgba(222,3,51,.4);background:var(--red-soft)}
+/* ---------- forms ---------- */
+label.lbl{display:block;font-weight:600;font-size:13.5px;color:var(--muted);margin:14px 0 6px;letter-spacing:.2px;text-transform:uppercase}
+textarea,input[type=text],input[type=number]{
+  width:100%;
+  background:var(--panel2);
+  color:var(--text);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:10px 12px;
+  font-family:var(--mono);
+  font-size:15px;
+  resize:vertical;
+}
+textarea:focus,input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.row > *{flex:0 0 auto}
+.row .grow{flex:1 1 200px}
+/* ---------- output ---------- */
+.outbox{
+  background:#fbfcfe;
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:12px 14px;
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+  white-space:pre-wrap;
+  min-height:20px;
+}
+.outbox .dim{color:var(--muted)}
+.outbox.good{border-color:rgba(5,150,105,.55);background:var(--good-soft)}
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-block;
+  background:var(--accent);
+  color:#fff;
+  border:1px solid var(--accent);
+  border-radius:8px;
+  padding:8px 14px;
+  font-size:14px;font-weight:600;
+  cursor:pointer;
+  font-family:var(--sans);
+}
+.btn:hover{background:#0a4d73}
+.btn.ghost{background:transparent;color:var(--accent);border-color:var(--accent-border)}
+.btn.ghost:hover{background:var(--accent-soft)}
+/* ---------- task / hint boxes ---------- */
+.task{
+  border-left:4px solid var(--accent);
+  background:linear-gradient(90deg,rgba(8,62,93,.06),transparent 60%);
+  border-radius:0 10px 10px 0;
+  padding:14px 18px;margin:18px 0;
+}
+.task h3{margin-top:0;color:var(--accent)}
+.hint{
+  border-left:4px solid #d97706;
+  background:linear-gradient(90deg,rgba(217,119,6,.07),transparent 60%);
+  border-radius:0 10px 10px 0;
+  padding:12px 18px;margin:12px 0;
+}
+.hint h4{margin:0 0 4px;color:var(--warn);font-size:14px;text-transform:uppercase;letter-spacing:.4px}
+/* ---------- details (reveal) ---------- */
+details{margin:10px 0}
+details summary{
+  cursor:pointer;font-weight:600;color:var(--muted);
+  list-style:none;display:inline-flex;align-items:center;gap:8px;
+  border:1px dashed var(--border2);border-radius:8px;padding:7px 14px;
+  font-size:14.5px;
+}
+details summary:hover{color:var(--accent);border-color:var(--accent-border)}
+details summary::before{content:"▸";color:var(--accent);transition:transform .15s}
+details[open] summary::before{transform:rotate(90deg)}
+details .body{padding:12px 4px 4px}
+.solution{
+  border:1px solid rgba(5,150,105,.45);
+  background:var(--good-soft);
+  border-radius:10px;padding:14px 18px;
+}
+.solution .ans{font-family:var(--mono);font-size:17px;color:var(--good);font-weight:700}
+/* ---------- tables ---------- */
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.5px}
+td.mono{font-family:var(--mono)}
+tr.best td{background:var(--good-soft)}
+/* ---------- score bars ---------- */
+.sbar{display:inline-block;vertical-align:middle;height:10px;border-radius:5px;background:var(--accent);min-width:2px}
+.score-good{color:var(--good)}
+.score-ok{color:var(--ok)}
+.score-bad{color:var(--bad)}
+/* ---------- frequency chart ---------- */
+.freq-row{display:grid;grid-template-columns:34px 1fr 120px;gap:10px;align-items:center;margin:3px 0;font-size:14px}
+.freq-row .letter{font-family:var(--mono);font-weight:700;text-align:right}
+.freq-row .track{background:var(--panel2);border:1px solid var(--border);border-radius:5px;height:20px;position:relative;overflow:hidden}
+.freq-row .fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#083e5d,#1d6d9c);border-radius:5px}
+.freq-row .fill.ref{background:linear-gradient(90deg,rgba(5,150,105,.45),rgba(5,150,105,.8))}
+.freq-row .nums{color:var(--muted);font-family:var(--mono);font-size:12.5px;text-align:right}
+/* ---------- key alignment chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px;max-height:170px;overflow:auto}
+.chip{
+  font-family:var(--mono);font-size:12.5px;
+  padding:2px 5px;border-radius:5px;
+  background:var(--panel2);border:1px solid var(--border);color:var(--muted);
+}
+.chip.k{color:var(--accent);background:var(--accent-soft);border-color:var(--accent-border)}
+.chip.sp{opacity:.45}
+/* ---------- rail fence viz ---------- */
+.railviz{
+  font-family:var(--mono);font-size:14px;line-height:1.6;
+  overflow-x:auto;background:var(--panel2);
+  border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+}
+.railviz .rail{display:block;white-space:pre}
+.railviz .on{color:var(--accent);font-weight:700}
+.railviz .off{color:#a9b6c6}
+.railviz .lbl{color:var(--muted);display:inline-block;width:3.2em}
+/* ---------- emoji blocks ---------- */
+.emoji-block{
+  font-size:30px;line-height:1.5;word-break:break-all;
+  background:var(--panel2);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+}
+.emoji-letters{font-family:var(--mono);letter-spacing:.4em;font-size:15px;color:var(--muted)}
+.map-table td:first-child{font-size:22px;width:60px}
+/* ---------- misc ---------- */
+.divider{height:1px;background:var(--border);margin:26px 0}
+.foot{
+  max-width:960px;margin:0 auto;padding:18px 20px 40px;
+  color:var(--muted);font-size:13.5px;
+  border-top:1px solid var(--border);
+  display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+}
+.foot a{color:var(--muted);text-decoration:none}
+.foot a:hover{color:var(--accent)}
+.foot::after{
+  content:"To protect what matters most";
+  font-style:italic;color:#8598ab;margin-left:auto;
+}
+.kbd{
+  font-family:var(--mono);font-size:.9em;
+  background:var(--panel2);border:1px solid var(--border2);
+  border-bottom-width:2px;border-radius:6px;padding:1px 7px;
+}
+@media (max-width:640px){
+  .hero h1{font-size:26px}
+  .hero-slide h1{font-size:30px}
+  body{font-size:15.5px}
+  .foot::after{margin-left:0}
+}

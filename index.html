@@ -1,24 +1,85 @@
 <!DOCTYPE html>
-<html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
-    <title>Crypto Examples</title>
-    <style type="text/css">body{margin:40px auto;max-width:650px;line-height:1.6;font-size:18px;color:#444;padding:0
-10px}h1,h2,h3{line-height:1.2}</style>
-  </head>
-  <h1>Ciphers</h1>
-  <ul>
-    <li><a href="fontys/caesar.html">Caesar</a></li>
-    <li><a href="fontys/vigenere.html">Vigenère</a></li>
-  </ul>
-  <h1>Tools</h1>
-  <ul>
-    <li><a href="fontys/frequency.html">frequency</a></li>
-  </ul>
-  <h1>Bonus</h1>
-  <ul>
-    <li><a href="fontys/uitdaging.html">uitdaging voor thuis</a></li>
-  </ul>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Crypto &amp; crypto-analyse — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a class="active" href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a href="#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="hero-slide">
+    <div class="inner">
+      <h1>Cryptografie &amp; crypto-analyse</h1>
+      <p>
+        Interactieve oefensite voor de les: klassieke ciphers live <b>proberen</b> met de tools.
+        Neem een opgave, werk in je browser,
+        en pas de methode toe die we op het bord zien. Geen installatie nodig.
+      </p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <h2 id="opgaven" style="margin-top:24px">Cijfers &amp; uitdagingen</h2>
+    <p style="color:var(--muted);margin-top:-6px">
+      Elke cijfer-pagina combineert het <b>cijfer live proberen</b> met de bijbehorende
+      <b>uitdaging</b> (een ciphertext om te kraken). Werk in je browser met de tool op
+      dezelfde pagina. De solvers en oplossingen kom je alleen tegen via een link die je apart krijgt.
+      Opgaves met een <span class="badge bonus">bonus</span>-label zijn extra’s, niet uit de presentatie.
+    </p>
+    <div class="grid">
+      <a class="tile" href="caesar.html">
+        <span class="t">Caesar-cijfer <span class="badge easy">uitdaging: basis</span> <span class="arrow">→</span></span>
+        <span class="d">Verschuif alle letters met een sleutel en zie live wat er gebeurt. · <b>Uitdaging:</b> kraak <span class="mono" style="font-size:12px">GTGTGY</span> — een kort fruitwoord.</span>
+      </a>
+      <a class="tile" href="vigenere.html">
+        <span class="t">Vigenère-cijfer <span class="badge easy">uitdaging: basis</span> <span class="badge bonus">bonus</span> <span class="arrow">→</span></span>
+        <span class="d">Versleutelen en ontsleutelen met een woord als sleutel, met visuele sleutel-uitlijning. · <b>Uitdaging:</b> een beren-liedje (172 tekens, sleutel van 3 letters) · <b>bonus:</b> lengte onbekend (175 tekens).</span>
+      </a>
+      <a class="tile" href="railfence.html">
+        <span class="t">Rail fence <span class="badge bonus">uitdaging: bonus</span> <span class="arrow">→</span></span>
+        <span class="d">Transpositie-cijfer: letters in een zigzag op sporen leggen, met live visualisatie. · <b>Uitdaging:</b> transpositie + Caesar in de juiste volgorde ongedaan maken.</span>
+      </a>
+      <a class="tile" href="enigma.html">
+        <span class="t">Enigma <span class="badge bonus">uitdagingen: bonus</span> <span class="arrow">→</span></span>
+        <span class="d">De klassieke codeermachine: 1 tot 5 rotors, reflector en stekkerbord, live coderen. · <b>Uitdagingen (bonus):</b> 1, 3 en 5 rotors — van 26 tot 11,9 miljoen starts.</span>
+      </a>
+      <a class="tile" href="frequency.html">
+        <span class="t">Letterfrequentie <span class="arrow">→</span></span>
+        <span class="d">Frequentie-grafiek van je tekst, optioneel vergeleken met het gemiddelde van het Nederlands. De brandstof van elke aanval.</span>
+      </a>
+      <a class="tile" href="enigma_kraken.html">
+        <span class="t">Enigma kraken? <span class="arrow">→</span></span>
+        <span class="d">Uitleg: eigenschappen van de Enigma, hoe groot de sleutelruimte écht is, en hoe Rejewski, Turing en de bombe hem openbraakten.</span>
+      </a>
+    </div>
+
+    <h3 style="margin-top:22px">🏠 Voor thuis</h3>
+    <div class="grid">
+      <a class="tile" href="opgave_emoji.html">
+        <span class="t">Emoji-cijfer <span class="badge hard">voor thuis</span> <span class="arrow">→</span></span>
+        <span class="d">72 emoji's = één geheime boodschap. Puur vervanging-cijfer: tellen, patronen zoeken, raden. Geen tool ter wereld helpt — alleen je hersens.</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span>Caesar · Vigenère · rail fence · Enigma · frequentie-analyse</span>
+  </div>
+</body>
 </html>

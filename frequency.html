@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Letterfrequentie — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Letterfrequentie</h1>
+      <p>
+        In het Nederlands komt <span class="mono">e</span> het meest voor, dan
+        <span class="mono">n</span>, <span class="mono">i</span>, <span class="mono">r</span>,
+        <span class="mono">t</span>, … en <span class="mono">x</span> &amp; <span class="mono">z</span>
+        bijna nooit. Die vingerafdruk verandert <b>niet</b> bij een Caesar-verschuiving —
+        precies waarom frequentie-analyse ciphers kraakt.
+      </p>
+    </div>
+
+    <div class="card">
+      <label class="lbl" for="plaintext">Tekst</label>
+      <textarea cols="40" rows="12" id="plaintext" oninput="do_crypto();">De wielen van de bus gaan rond en rond,
+rond en rond, rond en rond.
+De wielen van de bus gaan rond en rond,
+als de bus gaat rijden.
+
+De weg onder de bus gaat vlug voorbij,
+vlug voorbij, vlug voorbij.
+De weg onder de bus gaat vlug voorbij,
+als de bus gaat rijden.
+
+De kinderen in de bus zingen luid en zacht,
+luid en zacht, luid en zacht.
+De kinderen in de bus zingen luid en zacht,
+als de bus gaat rijden.
+
+De chauffeur van de bus kijkt links en rechts,
+links en rechts, links en rechts.
+De chauffeur van de bus kijkt links en rechts,
+als de bus gaat rijden.
+
+De mensen bij de halte zwaaien ons gedag,
+ons gedag, ons gedag.
+De mensen bij de halte zwaaien ons gedag,
+als de bus gaat rijden.</textarea>
+
+      <div class="row" style="margin:14px 0 6px">
+        <label style="display:flex;gap:7px;align-items:center;font-size:15px">
+          <input type="checkbox" id="compare" onchange="do_crypto();">
+          Vergelijk met gemiddeld Nederlands (indicatief)
+        </label>
+      </div>
+
+      <div id="chart"></div>
+      <p style="color:var(--muted);font-size:13px;margin:12px 0 0">
+        Blauw = jouw tekst, groen = referentie (percentage van alle tekens, spatie meegeteld als <span class="mono">_</span>).
+        De referentie is gemiddeld over veel Nederlandstalige teksten — korte tekken wijken af.
+      </p>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Opgave</h3>
+      <p>
+        Geef de tekst <span class="mono">gtgtyy</span> (spaties weggehaald) in
+        en kijk naar de frequentie. Welke letters komen het vaakst voor?
+        Wat zegt dat over de sleutel van het bijbehorende fruit-ciphertext
+        (zie de <a href="solver_caesar.html">Caesar-solver</a>)?
+      </p>
+      <details>
+        <summary>Oplossing</summary>
+        <div class="body solution">
+          <span class="mono">g</span> en <span class="mono">t</span> wisselen zich af → het plaintext
+          wisselt twee letters af, en het 6e teken is een "zeldzame" letter → <span class="ans">ananas</span>.
+          Bij langere teksten is de <b>meest voorkomende</b> letter van de ciphertext
+          meestal het gecodeerde <span class="mono">e</span> (of een spatie):
+          verschuiving = afstand tussen die letter en <span class="mono">e</span>.
+        </div>
+      </details>
+    </div>
+
+    <p style="color:var(--muted);font-size:14.5px">
+      Combineer dit met de <a href="solver_caesar.html">Caesar-solver →</a>
+      of de <a href="solver_vigenere.html">Vigenère-solver →</a>
+    </p>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <a href="caesar.html">Caesar</a>
+    <a href="vigenere.html">Vigenère</a>
+  </div>
+
+  <script>
+    /* Indicatieve gemiddelde frequenties voor het Nederlands, % van alle tekens (letter+spatie) */
+    var REF = {
+      "_":18.5, "e":16.0, "n":11.5, "i":7.0, "r":6.0, "t":5.4, "a":5.0, "s":4.4,
+      "o":3.9, "d":3.8, "l":3.5, "u":3.0, "g":3.0, "m":2.5, "h":2.0, "b":1.5,
+      "c":1.4, "f":1.6, "k":1.2, "p":1.2, "v":1.4, "j":1.1, "w":0.9, "y":0.5,
+      "x":0.1, "z":0.1
+    };
+
+    function do_crypto(){
+      var text = document.getElementById("plaintext").value.toLowerCase();
+      var chart = document.getElementById("chart");
+      var compare = document.getElementById("compare").checked;
+      if (!text.trim()){ chart.innerHTML = ""; return; }
+
+      var A = "a".charCodeAt(0);
+      var freq = {}, total = 0;
+      for (var i = 0; i < text.length; i++){
+        var c = 1 + text.charCodeAt(i) - A;
+        if (c >= 27 || c < 1) c = 0;
+        var ch = c === 0 ? "_" : String.fromCharCode(c - 1 + A);
+        freq[ch] = (freq[ch] || 0) + 1;
+        total++;
+      }
+
+      var maxpct = 0;
+      for (var k in freq){
+        var p = 100 * freq[k] / total;
+        if (p > maxpct) maxpct = p;
+        if (compare && REF[k] > maxpct) maxpct = REF[k];
+      }
+      if (maxpct === 0) maxpct = 1;
+
+      var order = "_abcdefghijklmnopqrstuvwxyz".split("");
+      var html = compare
+        ? '<div style="display:grid;grid-template-columns:34px 1fr;gap:10px;font-size:12.5px;color:var(--muted);margin-bottom:6px">'
+          + '<span></span><span>jouw tekst ▬ &nbsp;·&nbsp; Nederlands ▬</span></div>'
+        : "";
+      for (var x = 0; x < order.length; x++){
+        var ch = order[x];
+        var cnt = freq[ch] || 0;
+        var pct = cnt ? 100 * cnt / total : 0;
+        var refpct = compare ? REF[ch] : 0;
+        var w1 = Math.round(100 * pct / maxpct);
+        var w2 = Math.round(100 * refpct / maxpct);
+        var track = compare
+          ? '<div style="display:flex;flex-direction:column;gap:2px">'
+            + '<div class="track" style="height:9px"><div class="fill" style="width:' + w1 + '%"></div></div>'
+            + '<div class="track" style="height:9px"><div class="fill ref" style="width:' + w2 + '%"></div></div>'
+            + '</div>'
+          : '<div class="track"><div class="fill" style="width:' + w1 + '%"></div></div>';
+        html += '<div class="freq-row">' +
+                '<span class="letter">' + ch + '</span>' +
+                track +
+                '<span class="nums">' + cnt + '× · ' + pct.toFixed(1) + '%</span></div>';
+      }
+      chart.innerHTML = html;
+    }
+
+    do_crypto();
+  </script>
+</body>
+</html>

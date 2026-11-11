@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Caesar-solver — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a class="active" href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Caesar-solver</h1>
+      <p>
+        Plak een ciphertext en probeer alle 26 verschuivingen. Elke regel krijgt een
+        <b>score</b>: veel <span class="mono">e</span>'s en spaties → hoog score;
+        veel <span class="mono">x</span>, <span class="mono">y</span>, <span class="mono">q</span> → laag.
+        De beste gok wordt groen gemarkeerd.
+      </p>
+    </div>
+
+    <div class="card">
+      <label class="lbl" for="ciphertext">Ciphertext</label>
+      <textarea cols="40" rows="4" id="ciphertext" oninput="do_crypto();">kroodqghuv</textarea>
+
+      <div class="row" style="margin-top:14px;align-items:stretch">
+        <div class="grow" style="flex:1 1 280px">
+          <label class="lbl">Beste gok</label>
+          <div class="outbox good" id="bestplaintext"></div>
+          <p style="color:var(--muted);font-size:13.5px;margin:8px 0 0" id="bestkey"></p>
+        </div>
+        <div>
+          <label class="lbl">Alle 26 verschuivingen</label>
+          <div style="max-height:260px;overflow:auto;border:1px solid var(--border);border-radius:10px;background:var(--panel2)">
+            <table id="table">
+              <thead><tr><th>k</th><th>ontsleuteld</th><th>score</th></tr></thead>
+              <tbody id="rows"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>📖 Zo gebruik je hem</h3>
+      <p style="margin:0">
+        Plak een ciphertext (onderstaande demo is <span class="mono">hollanders</span> met een
+        Caesar-sleutel), bekijk de 26 verschuivingen (k = 1 … 26, mod 27) en de score per rij.
+        De <b>beste gok</b> krijgt een groene markering — bij korte teksten
+        (minder dan ±20 letters) geeft de solver eerlijk aan dat frequentie-analyse
+        dan weinig zegt, en moet je met het oog door de lijst lopen.
+        Oefenen? Neem de <a href="caesar.html#uitdaging">uitdaging op de Caesar-pagina</a> of versleutel
+        zelf iets met de <a href="caesar.html">Caesar-tool</a>.
+      </p>
+    </div>
+
+    <p style="color:var(--muted);font-size:14.5px">
+      Wil je sneller de juiste verschuiving zien zonder alles te lezen?
+      Kijk naar de <a href="frequency.html">letterfrequentie →</a>
+    </p>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">caesar · brute force · frequentie-score</span>
+  </div>
+
+  <script>
+    function caesar_decrypt(ct, k){
+      var A = "a".charCodeAt(0);
+      var out = "";
+      for (var i = 0; i < ct.length; i++){
+        var c = 1 + ct.charCodeAt(i) - A;
+        if (c >= 27 || c < 1) c = 0;
+        c = c - k;
+        while (c >= 27) c -= 27;
+        while (c < 0)  c += 27;
+        out += (c === 0) ? " " : String.fromCharCode(c - 1 + A);
+      }
+      return out;
+    }
+
+    function plaintext_score(plaintext){
+      var score = 0;
+      for (var i = 0; i < plaintext.length; i++){
+        var ch = plaintext.charAt(i);
+        if (ch === 'e') score += 1;
+        if (ch === ' ') score += 1;
+        if (ch === 'x') score -= 1;
+        if (ch === 'y') score -= 1;
+        if (ch === 'q') score -= 1;
+      }
+      return score / Math.max(1, plaintext.length);
+    }
+
+    function do_crypto(){
+      var ct = document.getElementById("ciphertext").value.toLowerCase();
+      var rows = document.getElementById("rows");
+      var best_score = -999, best_k = 0, best_pt = "";
+      var html = "";
+      var max_score = 0;
+      for (var k = 0; k < 27; k++){
+        var pt = caesar_decrypt(ct, k);
+        var s = plaintext_score(pt);
+        if (k > 0 && s > max_score) max_score = s;
+        if (k > 0 && s > best_score){
+          best_score = s; best_k = k; best_pt = pt;
+        }
+        if (k === 0) continue;   // k=0 is de identiteit, tonen we niet in de lijst
+        var cls = s > 0.15 ? "score-good" : (s > 0.05 ? "score-ok" : "score-bad");
+        var bar = Math.max(2, Math.round(90 * (s + 0.1) / 1.1));
+        // Display-only: max 20 tekens in de kolom, rest wordt "…"
+        // (de score/berekening gebruikt altijd de volledige tekst)
+        var disp = pt.length > 20 ? escapeHtml(pt.slice(0, 20)) + "…" : escapeHtml(pt);
+        html += '<tr class="' + (k === best_k ? "best" : "") + '">' +
+                '<td class="mono">' + k + '</td>' +
+                '<td class="mono" title="' + escapeHtml(pt) + '">' + disp + '</td>' +
+                '<td><span class="sbar" style="width:' + bar + 'px;background:' +
+                (cls === "score-good" ? "var(--good)" : cls === "score-ok" ? "var(--ok)" : "var(--bad)") +
+                '"></span> <span class="' + cls + '">' + s.toFixed(2) + '</span></td></tr>';
+      }
+      rows.innerHTML = html;
+      document.getElementById("bestplaintext").textContent = ct.trim() ? best_pt : "";
+      var msg;
+      if (!ct.trim()) {
+        msg = "Plak een ciphertext om te beginnen.";
+      } else {
+        msg = 'Voor <span class="mono" style="color:var(--accent)">k = ' + best_k + '</span> is de score het hoogst.';
+        var shortText = ct.replace(/[^a-z]/g, "").length < 20;
+        if (shortText || best_score < 0.2){
+          msg += ' <span style="color:var(--muted)">Maar ' +
+                 (shortText ? "de tekst is kort" : "de score is laag") +
+                 ': dan zegt frequentie-analyse weinig. Lees de lijst en gebruik je (taal)kennis.</span>';
+        }
+      }
+      document.getElementById("bestkey").innerHTML = msg;
+    }
+
+    function escapeHtml(s){
+      return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    }
+
+    do_crypto();
+  </script>
+</body>
+</html>

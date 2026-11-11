@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Rail fence (transpositie) — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a class="active" href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Rail fence-cijfer <span class="badge tool">transpositie</span></h1>
+      <p>
+        Geen letters vervangen, maar <b>permuteren</b>: schrijf de tekst in een
+        zigzag over <i>r</i> "sporen" (rails) en lees de sporen achter elkaar af.
+        Belangrijk verschil met een Caesar/Vigenère-cijfer:
+        de <b>letterfrequentie blijft exact hetzelfde</b> —
+        frequentie-analyse herkent transpositie dus niet, maar kan ook niet tegen.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div style="max-width:200px">
+          <label class="lbl" for="rails">Aantal sporen</label>
+          <input type="number" id="rails" min="2" max="8" value="3" oninput="do_crypto();">
+        </div>
+        <div>
+          <label class="lbl">Richting</label>
+          <div class="row">
+            <label style="display:flex;gap:6px;align-items:center;color:var(--text);font-size:15px">
+              <input type="radio" name="mode" value="enc" checked onchange="do_crypto();"> versleutelen
+            </label>
+            <label style="display:flex;gap:6px;align-items:center;color:var(--text);font-size:15px">
+              <input type="radio" name="mode" value="dec" onchange="do_crypto();"> ontsleutelen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <label class="lbl" for="plaintext">Tekst</label>
+      <textarea cols="40" rows="5" id="plaintext" oninput="do_crypto();">crypto_analyse_is_meeuwen_oude_kunst</textarea>
+
+      <label class="lbl">Zigzag (versleuteling)</label>
+      <div class="railviz" id="viz"></div>
+
+      <label class="lbl" for="ciphertext">Resultaat (sporen aan elkaar plakken)</label>
+      <div class="outbox" id="ciphertext"></div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_out()">⧉ Kopieer resultaat</button>
+      </div>
+    </div>
+
+    <div class="hint">
+      <h4>Wet van de volgorde</h4>
+      <p style="margin:0">
+        Ga je <b>achteraan</b> ontleden? Dan pas je de laatste toegepaste codering
+        als eerste ongedaan. Is iets eerst transpositie en daarna Caesar,
+        dan ontdo je <b>eerst de Caesar</b> en daarna de transpositie.
+      </p>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Opgave</h3>
+      <p>
+        Versleutel <span class="mono">railfence</span> met 3 sporen.
+        Krijg je <span class="mono">rfealecin</span>?
+        En ontsleutel daarna <span class="mono">ctnssendurpoaayei_eue_ueknty_l_mwo_s</span>
+        met 3 sporen — wat valt er dan <i>nog</i> op?
+      </p>
+      <details>
+        <summary>Oplossing</summary>
+        <div class="body solution">
+          <span class="mono">railfence</span> met 3 sporen → <span class="ans">rfealecin</span>.<br>
+          En de tweede tekst is al bijna leesbaar: het is
+          <span class="mono">crypto_analyse_is_meeuwen_oude_kunst</span>
+          — maar dan nog met een Caesar-laag eroverheen.
+          <a href="#uitdaging">Exact die combinatie is de uitdaging hieronder ↓</a>
+        </div>
+      </details>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card" id="uitdaging">
+      <label class="lbl">Uitdaging · Transpositie + Caesar <span class="badge bonus" style="margin-left:6px">bonus</span></label>
+      <p style="color:var(--muted);margin:6px 0 10px">
+        Dit bericht is <b>twee keer</b> gecodeerd, de ene codering achter de andere:
+        eerst <b>transpositie</b> (rail fence met 3 sporen), daarna een
+        <b>Caesar-verschuiving</b> met een onbekende sleutel.
+        Je moet beide lagen vinden — en in de juiste volgorde ongedaan maken.
+      </p>
+      <div class="outbox" id="ct3" style="font-size:18px">lbwaanwmc_yxjjgnrincnicntwbgiuivexia</div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_ct3()">⧉ Kopieer</button>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Opgave</h3>
+      <p>Ontcijfer het bericht hierboven.</p>
+      <details>
+        <summary>Hint 1 · in welke volgorde?</summary>
+        <div class="body">
+          <p style="margin:0">
+            Ontleed altijd <b>achteraan</b>: wat als <i>laatst</i> is toegepast,
+            ongedaan maken als <i>eerst</i>. De Caesar-verschuiving is als laatste
+            toegepast → begin daar.
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>Hint 2 · hoe vind je de Caesar-sleutel?</summary>
+        <div class="body">
+          <p style="margin:0">
+            Transpositie verandert de volgorde van de letters, maar <b>niet de frequentie</b>.
+            Dus: frequentie-analyse (of alle 26 verschuivingen afproberen met de
+            <a href="caesar.html">Caesar-tool</a>) werkt gewoon op de ciphertext. Wat is de sleutel?
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>Hint 3 · wat nu?</summary>
+        <div class="body">
+          <p style="margin:0">
+            Ontschuif de Caesar en kijk naar het resultaat: het is nog steeds
+            onleesbaar. Dat is de <b>rail fence-uitgang</b>.
+            Pas de <b>rail fence-decoder hierboven</b> toe met het aangegeven aantal sporen.
+          </p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <a href="caesar.html">Caesar</a>
+    <a href="#uitdaging">Uitdaging</a>
+  </div>
+
+  <script>
+    function railfence_encrypt(text, r){
+      var rails = [];
+      for (var i = 0; i < r; i++) rails.push("");
+      var row = 0, step = 1;
+      for (var i = 0; i < text.length; i++){
+        rails[row] += text.charAt(i);
+        if (row === 0) step = 1;
+        else if (row === r - 1) step = -1;
+        row += step;
+      }
+      return { rails: rails, out: rails.join("") };
+    }
+
+    function row_of(j, r){
+      var cycle = 2 * (r - 1);
+      var m = j % cycle;
+      return m < r ? m : cycle - m;
+    }
+
+    function railfence_decrypt(ct, r){
+      var n = ct.length;
+      var lens = [];
+      for (var i = 0; i < r; i++) lens.push(0);
+      for (var j = 0; j < n; j++) lens[row_of(j, r)]++;
+      var rails = [], pos = 0;
+      for (var i = 0; i < r; i++){
+        rails.push(ct.substr(pos, lens[i]));
+        pos += lens[i];
+      }
+      var ptr = [], out = "";
+      for (var i = 0; i < r; i++) ptr.push(0);
+      for (var j = 0; j < n; j++){
+        var rr = row_of(j, r);
+        out += rails[rr].charAt(ptr[rr]);
+        ptr[rr]++;
+      }
+      return out;
+    }
+
+    function draw_viz(text, r){
+      var res = railfence_encrypt(text, r);
+      var html = "";
+      var n = text.length;
+      for (var i = 0; i < r; i++){
+        var line = "", row = res.rails[i], rp = 0;
+        for (var j = 0; j < n; j++){
+          if (row_of(j, r) === i){
+            line += '<span class="on">' + row.charAt(rp) + '</span>';
+            rp++;
+          } else {
+            line += '<span class="off">·</span>';
+          }
+        }
+        html += '<span class="rail"><span class="lbl">' + (i + 1) + ' ▸</span>' + line + '</span>';
+      }
+      document.getElementById("viz").innerHTML = html;
+    }
+
+    function do_crypto(){
+      var text = document.getElementById("plaintext").value.toLowerCase();
+      var r = Number(document.getElementById("rails").value);
+      var decrypt = document.querySelector('input[name=mode]:checked').value === "dec";
+      if (!text.trim()){
+        document.getElementById("viz").innerHTML = "";
+        document.getElementById("ciphertext").textContent = "";
+        return;
+      }
+      draw_viz(text, r);
+      document.getElementById("ciphertext").textContent =
+        decrypt ? railfence_decrypt(text, r) : railfence_encrypt(text, r).out;
+    }
+
+    function copy_out(){
+      var t = document.getElementById("ciphertext").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+
+    function copy_ct3(){
+      var t = document.getElementById("ct3").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+
+    do_crypto();
+  </script>
+</body>
+</html>

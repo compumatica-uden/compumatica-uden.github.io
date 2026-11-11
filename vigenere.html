@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Vigenère-cijfer — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a class="active" href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Vigenère-cijfer</h1>
+      <p>
+        Werkt als een Caesar-cijfer, maar de verschuiving wisselt per letter volgens de
+        <b>sleutel</b> (een woord). De sleutel herhaalt zich zolang het bericht duurt.
+        Onder de tekst zie je live welke sleutel-letter op elk karakter wordt toegepast.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div class="grow">
+          <label class="lbl" for="key">Sleutel (woord)</label>
+          <input type="text" id="key" value="compumatica" oninput="do_crypto();">
+        </div>
+        <div>
+          <label class="lbl">Richting</label>
+          <div class="row">
+            <label style="display:flex;gap:6px;align-items:center;color:var(--text);font-size:15px">
+              <input type="radio" name="mode" value="enc" checked onchange="do_crypto();"> versleutelen
+            </label>
+            <label style="display:flex;gap:6px;align-items:center;color:var(--text);font-size:15px">
+              <input type="radio" name="mode" value="dec" onchange="do_crypto();"> ontsleutelen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <label class="lbl" for="plaintext">Tekst</label>
+      <textarea cols="40" rows="7" id="plaintext" oninput="do_crypto();">De wielen van de bus gaan rond en rond,
+rond en rond, rond en rond.
+De wielen van de bus gaan rond en rond,
+als de bus gaat rijden.
+
+De weg onder de bus gaat vlug voorbij,
+vlug voorbij, vlug voorbij.
+De weg onder de bus gaat vlug voorbij,
+als de bus gaat rijden.</textarea>
+
+      <label class="lbl">Sleutel-uitlijning <span style="text-transform:none;font-weight:400">(welke sleutel-letter bij welk karakter)</span></label>
+      <div class="chips" id="alignment"></div>
+
+      <label class="lbl" for="ciphertext">Resultaat</label>
+      <div class="outbox" id="ciphertext"></div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_out()">⧉ Kopieer resultaat</button>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Opgave</h3>
+      <p>
+        Versleutel <span class="mono">voorbeeld</span> met sleutel
+        <span class="mono">key</span>. Wat is het resultaat?
+        En ontsleutel daarna <span class="mono">pjsgtkljflixlpjmfa</span> met sleutel
+        <span class="mono">les</span> — waar kom je uit?
+      </p>
+      <details>
+        <summary>Oplossing</summary>
+        <div class="body solution">
+          <span class="mono">voorbeeld</span> met sleutel <span class="mono">key</span> →
+          <span class="ans">ftmbgcpqb</span> (verschoven met k-e-y-k-e-y-k-e-y).<br>
+          En <span class="mono">pjsgtkljflixlpjmfa</span> ontsleuteld met sleutel
+          <span class="mono">les</span> → <span class="ans">de vos en de kraai</span> —
+          de fabel die als voorbeeld in de tool hierboven staat.
+        </div>
+      </details>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="task" id="uitdaging">
+      <h3>🎯 Uitdaging · Vigenère kraken <span class="badge easy">basis</span></h3>
+      <p>
+        Een boodschap is gecodeerd met het Vigenère-cijfer. Je weet gelukkig de
+        <b>sleutellengte</b> — de rest is werk. Ontcijfer deze ciphertext:
+      </p>
+      <div class="outbox" id="ct1" style="font-size:17px;letter-spacing:1px">ktjajqbbfgnjdnagwjd_yqmtgajuvotnxbiyjijjncbekuiogwjyxxfnabqovifcajgnxbeypmotijdxegwjyxxfnabmkvinknjdnagwjuvotnxbtypmopirkirkirkijjjjjjjjjjktjubypmjg_jdrtbnxbrubtogtjg_jpjkt</div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_ct1()">⧉ Kopieer</button>
+      </div>
+      <p>De sleutel is <b>3 letters</b>. Wat is de sleutel, en wat staat er in de boodschap?</p>
+    </div>
+
+    <div class="hint">
+      <h4>💡 Hint 1 — deel het op</h4>
+      <p style="margin:0">
+        De sleutel van 3 letters verschuift elke derde letter met dezelfde Caesar-sleutel.
+        Split de ciphertext daarom in <b>3 subteksten</b> (posities 1-4-7-…, 2-5-8-…, 3-6-9-…)
+        en kraak elke subtekst apart als een Caesar-cijfer.
+      </p>
+    </div>
+    <details>
+      <summary>Hint 2 — twijfel in de derde positie</summary>
+      <div class="body">
+        <p>
+          De derde positie geeft mogelijk <b>twee</b> kandidaten. Probeer beide —
+          één geeft nonsens, de andere geeft een gedicht.
+        </p>
+      </div>
+    </details>
+
+    <div class="divider"></div>
+
+    <div class="card" id="uitdaging2">
+      <label class="lbl">Uitdaging · Vigenère, lengte onbekend <span class="badge bonus" style="margin-left:6px">bonus</span></label>
+      <p style="color:var(--muted);margin:6px 0 10px">
+        Dit bericht is versleuteld met een Vigenère-cijfer — maar je krijgt
+        <b>geen hint over de lengte</b> van de sleutel. Eerst de lengte, dan de sleutel.
+      </p>
+      <div class="outbox" id="ct2" style="font-size:16px">ptxeycpirtrihognswiwwtayctregtdnqsibcjescrsnqrmihbgjczyscyiegtdxotyyh_pjqvxjcjesctiscjmlhbiwhognmuiwcqiud_isctregpewqpduhfdurgmyltdihonzlgxjc_iywtveuphjqoiscsieecsivrlfsopjbtr</div>
+      <div style="margin-top:10px">
+        <button class="btn ghost" onclick="copy_ct2()">⧉ Kopieer</button>
+      </div>
+    </div>
+
+    <div class="task">
+      <h3>🎯 Opgave</h3>
+      <p>Ontcijfer het bericht hierboven.</p>
+      <details>
+        <summary>Hint 1 · index of coincidence</summary>
+        <div class="body">
+          <p style="margin:0">
+            In gewone Nederlandstalige tekst komen letters vaker "toevallig" overeen
+            dan in willekeurige tekst (IC ≈ 0.067 vs ≈ 0.038).
+            Splits de ciphertext in hypothetische sleutellengtes en bereken per
+            lengte het gemiddelde IC van de subteksten:
+            de <b>piek</b> zit bij de echte lengte (en bij veelvouden ervan).
+          </p>
+        </div>
+      </details>
+      <details>
+        <summary>Hint 2 · veelvouden</summary>
+        <div class="body">
+          <p style="margin:0">
+            Piekt het IC bij lengtes die <b>veelvouden</b> van elkaar zijn (bijv. 4, 8 en 12),
+            dan is de echte lengte vrijwel zeker de <b>kleinste</b> van die set.
+            Zet die lengte in en vind per positie de sleutel-letter — kom je er niet uit,
+            probeer ook de kandidaat die net onder de winnaar scoort.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin-top:0">🛠️ Hiermee aan de slag</h3>
+      <ul style="margin:8px 0 0;padding-left:20px;line-height:2">
+        <li>De <b>Vigenère-tool hierboven</b> — check je gevonden sleutel door de tekst weer te versleutelen</li>
+        <li><a href="frequency.html">Letterfrequentie</a> — om de subteksten te interpreteren</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <a href="frequency.html">Frequentie</a>
+  </div>
+
+  <script>
+    function vigenere_transform(text, key, decrypt){
+      var A = "a".charCodeAt(0);
+      var out = "";
+      key = key.replace(/[^a-z]/g, "");
+      if (!key.length) return "";
+      for (var i = 0; i < text.length; i++){
+        var j = (key.length + i) % key.length;
+        var c = 1 + text.charCodeAt(i) - A;
+        var k = 1 + key.charCodeAt(j) - A;
+        if (c >= 27 || c < 1) c = 0;
+        if (k >= 27 || k < 1) k = 0;
+        c = decrypt ? (c + 54 - k) % 27 : (c + k) % 27;
+        out += (c === 0) ? (decrypt ? " " : "_") : String.fromCharCode(c - 1 + A);
+      }
+      return out;
+    }
+
+    function draw_alignment(text, key){
+      key = key.replace(/[^a-z]/g, "");
+      var el = document.getElementById("alignment");
+      if (!key.length){ el.innerHTML = ""; return; }
+      var html = "";
+      for (var i = 0; i < text.length; i++){
+        var j = (key.length + i) % key.length;
+        var ch = text.charAt(i);
+        if (ch === " "){
+          html += '<span class="chip sp">·</span>';
+        } else {
+          html += '<span class="chip k">' + key.charAt(j) + '</span>';
+        }
+      }
+      el.innerHTML = html;
+    }
+
+    function do_crypto(){
+      var text = document.getElementById("plaintext").value.toLowerCase();
+      var key = document.getElementById("key").value.toLowerCase();
+      var decrypt = document.querySelector('input[name=mode]:checked').value === "dec";
+      draw_alignment(text, key);
+      document.getElementById("ciphertext").textContent =
+        text.trim() === "" || key.trim() === "" ? "" : vigenere_transform(text, key, decrypt);
+    }
+
+    function copy_out(){
+      var t = document.getElementById("ciphertext").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+
+    function copy_ct1(){
+      var t = document.getElementById("ct1").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+
+    function copy_ct2(){
+      var t = document.getElementById("ct2").textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(t);
+    }
+
+    do_crypto();
+  </script>
+</body>
+</html>

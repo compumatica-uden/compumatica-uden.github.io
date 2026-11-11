@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Enigma — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a class="active" href="enigma.html">Enigma</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Enigma-simulator</h1>
+      <p>
+        De klassieke Enigma: <b>1 tot 5 rotors</b> + reflector + (optioneel) stekkerbord.
+        Versleutelen en ontsleutelen is <b>hetzelfde</b> — zet dezelfde instellingen
+        en typ de tekst er doorheen. Let op: een letter wordt nooit door zichzelf gecodeerd,
+        en je mag alleen letters (a–z) intypen.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <label class="lbl">Aantal rotors</label>
+        <select id="nrotors" onchange="build_rotor_rows();update();" style="width:auto;margin-bottom:0">
+          <option value="1">1 rotor (makkelijkst)</option>
+          <option value="3" selected>3 rotors (klassiek Enigma I)</option>
+          <option value="5">5 rotors (heel veel combinaties)</option>
+        </select>
+      </div>
+
+      <div id="rotor-rows" style="margin-top:14px"></div>
+
+      <div class="row" style="margin-top:14px">
+        <label class="lbl">Reflector (UKW)</label>
+        <select id="reflector" onchange="update()" style="width:auto;margin-bottom:0">
+          <option value="B" selected>UKW-B</option>
+          <option value="C">UKW-C</option>
+        </select>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <label class="lbl" for="plugboard">Stekkerbord <small style="text-transform:none;font-weight:400">(optioneel, bijv. <span class="mono">ab cd ef</span>)</small></label>
+        <input type="text" id="plugboard" value="" oninput="update()" placeholder="geen koppelingen" style="max-width:340px">
+      </div>
+
+      <div class="divider"></div>
+
+      <label class="lbl" for="input">Tekst (alleen letters)</label>
+      <textarea cols="40" rows="3" id="input" oninput="update()" spellcheck="false">helloworld</textarea>
+
+      <div class="row" style="margin-top:14px;align-items:flex-start">
+        <div class="grow">
+          <label class="lbl">Resultaat</label>
+          <div class="outbox mono" id="output">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hint">
+      <h4>⚙️ Hoe de Enigma werkt (kort)</h4>
+      <p style="margin:0">Bij <b>elke</b> letter draait de rechter rotor één stap (en soms ook de middelste —
+      "double stepping"). Het signaal loopt rechts → links door de rotors, kaatst terug van de reflector
+      en loopt links → rechts weer door. De <b>ring-instelling</b> verspringt de wiring binnen de rotor,
+      de <b>startpositie</b> is waar de rotor staat als je begint. Het stekkerbord verwisselt letters
+      vóór en ná de rotors (elke koppeling verveelvoudigt de mogelijkheden enorm).</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="task" id="uitdaging1">
+      <h3>🎯 Uitdaging · Enigma, 1 rotor <span class="badge bonus">bonus</span></h3>
+      <p>
+        Een (sterk vereenvoudigde) Enigma met <b>één rotor</b>. Je weet bijna alles —
+        alleen de <b>startpositie</b> ontbreekt. En dat zijn er maar 26 van.
+        Ontcijfer dit ciphertext. Bekende instellingen:
+      </p>
+      <ul style="line-height:2;margin:8px 0">
+        <li>rotor: <b>I</b> (de enige rotor, rechts)</li>
+        <li>reflector: <b>UKW-B</b></li>
+        <li>ring-instelling: <b>a</b></li>
+        <li>stekkerbord: <b>geen</b></li>
+        <li>startpositie: <b>onbekend</b> (één letter, a–z)</li>
+      </ul>
+      <p class="mono" style="font-size:16px;letter-spacing:1px;margin:10px 0">ugzmzkcftducsdqfafhakwhqflgyzuvkubszcezwhveanbka</p>
+    </div>
+
+    <div class="hint">
+      <h4>💡 Hint 1 — maar 26 mogelijkheden</h4>
+      <p style="margin:0">
+        Stel de machine hierboven in (1 rotor, rotor I, UKW-B, ring a) en probeer de 26
+        startposities af, handmatig of door slim te gokken.
+      </p>
+    </div>
+    <details>
+      <summary>Hint 2 — hoe je het handmatig sneller vindt</summary>
+      <div class="body">
+        <p>
+          Een Enigma-codering geeft <b>nooit</b> dezelfde letter terug. En: met één rotor
+          verschuift de "sleutel" elke letter met één stap. Kijk naar de eerste letters
+          van het ciphertext en probeer vooral starts die een letter geven die in het
+          Nederlands vaak begint: <span class="mono">d</span>, <span class="mono">e</span>,
+          <span class="mono">h</span>, <span class="mono">i</span>, <span class="mono">m</span>,
+          <span class="mono">w</span>.
+        </p>
+      </div>
+    </details>
+
+    <div class="divider"></div>
+
+    <div class="task" id="uitdaging3">
+      <h3>🎯 Uitdaging · Enigma, 3 rotors <span class="badge bonus">bonus</span></h3>
+      <p>
+        Het <b>klassieke Enigma I</b>: drie rotors. Nu ontbreken <b>alle drie</b> de
+        startposities. Dat zijn er 26 × 26 × 26 = <b>17.576</b> van — handmatig te veel,
+        voor de computer een kinderspel.
+      </p>
+      <ul style="line-height:2;margin:8px 0">
+        <li>rotors (links → rechts): <b>I, II, III</b></li>
+        <li>reflector: <b>UKW-B</b></li>
+        <li>ring-instellingen: <b>a, a, a</b></li>
+        <li>stekkerbord: <b>geen</b></li>
+        <li>startposities: <b>alle drie onbekend</b> (3 letters, a–z)</li>
+      </ul>
+      <p class="mono" style="font-size:16px;letter-spacing:1px;margin:10px 0">hhvuwbgsjvvtjinubamoypwbgdsnokbjvakpftpfsnuuvdppefcdfjpnasbuyg</p>
+    </div>
+
+    <details style="margin-top:12px">
+      <summary>💡 Hint — waarom dit wél lukt</summary>
+      <div class="body">
+        <p>
+          17.576 combinaties klinkt veel, maar elke combinatie ontsleutelt je tekst in
+          een oogwenk en frequentie-analyse pakt de juiste eruit. Vergelijk: met een
+          stekkerbord van 10 koppelingen vermenigvuldigt het aantal mogelijkheden met
+          <b>≈ 37 miljard</b>. Dan is er meer dan brute force nodig —
+          zie <a href="enigma_kraken.html">hoe je een Enigma zou kraken</a>.
+        </p>
+      </div>
+    </details>
+
+    <div class="divider"></div>
+
+    <div class="task" id="uitdaging5">
+      <h3>🎯 Uitdaging · Enigma, 5 rotors <span class="badge bonus">bonus</span></h3>
+      <p>
+        Vijf rotors, alle vijf de startposities onbekend: 26⁵ = <b>11.881.376</b>
+        combinaties. Brute force in een browser lukt hier <b>niet</b> — en dat is precies
+        de les. Deze boodschap ontsleutel je alleen als iemand je de instellingen geeft.
+      </p>
+      <ul style="line-height:2;margin:8px 0">
+        <li>rotors (links → rechts): <b>I, II, III, IV, V</b></li>
+        <li>reflector: <b>UKW-B</b></li>
+        <li>ring-instellingen: <b>allemaal a</b></li>
+        <li>stekkerbord: <b>geen</b></li>
+        <li>startposities: <b>alle vijf onbekend</b> (26⁵ ≈ 11,9 miljoen combinaties)</li>
+      </ul>
+      <p class="mono" style="font-size:16px;letter-spacing:1px;margin:10px 0">rixkcbqhgdudupnuogsqlgzkxtimkhbcffasfxsqnvetndeommlhgfmnvzyc</p>
+    </div>
+
+    <details style="margin-top:12px">
+      <summary>💡 Hint — hoe men dit wél kraakte</summary>
+      <div class="body">
+        <p>
+          In het echte leven werd de Enigma niet gekraakt met brute force, maar met
+          <b>slimme wiskunde</b> (cribs, cillies) en speciale machines (de bombe) —
+          en met hulp van menselijke fouten. Lees
+          <a href="enigma_kraken.html">hoe je een Enigma zou kraken</a> voor de volledige uitleg.
+        </p>
+      </div>
+    </details>
+
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin-top:0">🛠️ Hiermee aan de slag</h3>
+      <ul style="margin:8px 0 0;padding-left:20px;line-height:2">
+        <li>De <b>Enigma-simulator hierboven</b> — stel de machine in, probeer starts af, en controleer je antwoord</li>
+        <li><a href="enigma_kraken.html">Hoe kraak je een Enigma?</a> — cribs, cillies, de bombe en de sleutelruimte</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">rotors I–V · UKW-B/C · stekkerbord</span>
+  </div>
+
+<script>
+const ROTORS = {
+  I:   {w: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: 16},
+  II:  {w: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: 10},
+  III: {w: "BDFHJLCPRTXVZNYEIWGAKMUSQO", notch: 12},
+  IV:  {w: "ESOVPZJAYQUIRHXLNFTGKDCMWB", notch: 21},
+  V:   {w: "VZBRGITYUPSDNHLXAWMJQOFECK", notch: 25}
+};
+const REFL = {
+  B: "YRUHQSLDPXNGOKMIEBFZCWVJAT",
+  C: "FVPJIAOYEDRZXWGCTKUQSBNMHL"
+};
+const INV = {};
+for (const k in ROTORS) {
+  INV[k] = new Array(26);
+  for (let i = 0; i < 26; i++) INV[k][ROTORS[k].w.charCodeAt(i) - 65] = i;
+}
+
+function letters_only(s) { return s.toLowerCase().replace(/[^a-z]/g, ""); }
+
+function make_plug(s) {
+  const pm = Array.from({length: 26}, (_, i) => i);
+  const t = s.toUpperCase().replace(/[^A-Z]/g, "");
+  for (let i = 0; i + 1 < t.length; i += 2) {
+    const a = t.charCodeAt(i) - 65, b = t.charCodeAt(i + 1) - 65;
+    if (a !== b) { const t2 = pm[a]; pm[a] = pm[b]; pm[b] = t2; }
+  }
+  return pm;
+}
+
+function enigma_encode(text, rotors, refl, starts, rings, plug) {
+  const pm = make_plug(plug || "");
+  const n = rotors.length;
+  if (typeof starts !== "string") starts = starts.join("");
+  if (typeof rings !== "string") rings = rings.join("");
+  starts = starts.toLowerCase();
+  rings = rings.toLowerCase();
+  const pos = [...starts].map(c => c.charCodeAt(0) - 97);
+  const ring = [...rings].map(c => c.charCodeAt(0) - 97);
+  const wires = rotors.map(r => ROTORS[r].w);
+  const invs  = rotors.map(r => INV[r]);
+  const notch = rotors.map(r => ROTORS[r].notch);
+  const refl_s = REFL[refl];
+  let out = "";
+  for (const ch of letters_only(text)) {
+    let x = pm[ch.charCodeAt(0) - 97];
+    // rotors stappen
+    const mid_at  = n >= 2 && pos[n - 2] === notch[n - 2];
+    const right_at = n >= 2 && pos[n - 1] === notch[n - 1];
+    pos[n - 1] = (pos[n - 1] + 1) % 26;
+    if (mid_at) {
+      pos[n - 2] = (pos[n - 2] + 1) % 26;
+      if (n > 2) pos[n - 3] = (pos[n - 3] + 1) % 26;
+    } else if (right_at) {
+      pos[n - 2] = (pos[n - 2] + 1) % 26;
+    }
+    // signaal: rechts -> links -> reflector -> links -> rechts
+    for (let i = n - 1; i >= 0; i--) {
+      const off = (pos[i] - ring[i] + 26) % 26;
+      x = (wires[i].charCodeAt((x + off) % 26) - 65 - off + 52) % 26;
+    }
+    x = refl_s.charCodeAt(x) - 65;
+    for (let i = 0; i < n; i++) {
+      const off = (pos[i] - ring[i] + 26) % 26;
+      x = (invs[i][(x + off) % 26] - off + 52) % 26;
+    }
+    out += String.fromCharCode(pm[x] + 97);
+  }
+  return out;
+}
+
+function rotor_dropdown(i, used) {
+  let opts = "";
+  for (const r of ["I","II","III","IV","V"]) {
+    const disabled = used.includes(r) && used[r] !== i ? "disabled" : "";
+    opts += `<option value="${r}" ${disabled}>rotor ${r}</option>`;
+  }
+  return opts;
+}
+
+let rotor_names = ["I","II","III"];
+function build_rotor_rows() {
+  const n = parseInt(document.getElementById("nrotors").value, 10);
+  const box = document.getElementById("rotor-rows");
+  const prev = rotor_names.slice(0, n);
+  while (prev.length < n) prev.push(["I","II","III","IV","V"][prev.length]);
+  rotor_names = prev.slice(0, n);
+  let html = `<table style="min-width:520px"><tr><th style="width:70px">positie</th><th>rotor</th><th>start (a–z)</th><th>ring (a–z)</th></tr>`;
+  const labels = n === 1 ? ["rechter"] : n === 3 ? ["links","midden","rechts"] : ["1 (links)","2","3","4","5 (rechts)"];
+  rotor_names.forEach((r, i) => {
+    const used = rotor_names.map((x, j) => [x, j]);
+    html += `<tr>
+      <td class="mono">${labels[i]}</td>
+      <td><select onchange="on_rotor_change(${i}, this.value)" style="width:auto;margin:0">${rotor_dropdown(i, used)}</select></td>
+      <td><input type="text" id="start${i}" value="a" maxlength="1" oninput="update()" style="width:52px;margin:0;text-transform:lowercase"></td>
+      <td><input type="text" id="ring${i}" value="a" maxlength="1" oninput="update()" style="width:52px;margin:0;text-transform:lowercase"></td>
+    </tr>`;
+  });
+  html += `</table>`;
+  box.innerHTML = html;
+  rotor_names.forEach((r, i) => {
+    const sel = box.querySelectorAll("select")[i];
+    sel.value = r;
+  });
+}
+function on_rotor_change(i, v) {
+  rotor_names[i] = v;
+  build_rotor_rows();
+  update();
+}
+
+function read_config() {
+  const starts = rotor_names.map((_, i) => (document.getElementById("start" + i).value || "a").toLowerCase().slice(-1) || "a");
+  const rings  = rotor_names.map((_, i) => (document.getElementById("ring" + i).value || "a").toLowerCase().slice(-1) || "a");
+  return {
+    rotors: rotor_names.slice(),
+    refl: document.getElementById("reflector").value,
+    starts, rings,
+    plug: document.getElementById("plugboard").value
+  };
+}
+function update() {
+  const cfg = read_config();
+  document.getElementById("output").textContent =
+    enigma_encode(document.getElementById("input").value, cfg.rotors, cfg.refl, cfg.starts, cfg.rings, cfg.plug) || "—";
+}
+build_rotor_rows();
+update();
+</script>
+</body>
+</html>

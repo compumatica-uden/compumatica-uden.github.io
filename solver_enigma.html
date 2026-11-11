@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Enigma-solver — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a class="active" href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Enigma-solver</h1>
+      <p>
+        <b>Brute force</b> op de startposities van de rotors: je geeft aan welke startposities
+        <b>onbekend</b> zijn, en de solver probeert alle combinaties. Elke combinatie ontsleutelt
+        het ciphertext en krijgt een score op basis van de Nederlandse letterfrequentie.
+        Onbekende rotors krijgen ring-instelling <span class="mono">a</span> (de oefeningen gebruiken allemaal ring&nbsp;a).
+        Dit werkt snel tot 3 onbekende rotors (17.576 combinaties). Meer? Dat is precies waarom
+        de Enigma "onbreekbaar" leek — zie <a href="enigma_kraken.html">hoe je een Enigma zou kraken</a>.
+      </p>
+    </div>
+
+    <div class="card">
+      <label class="lbl" for="ciphertext">Ciphertext (alleen letters)</label>
+      <textarea cols="40" rows="3" id="ciphertext" spellcheck="false">ugzmzkcftducsdqfafhakwhqflgyzuvkubszcezwhveanbka</textarea>
+
+      <label class="lbl" for="nrotors" style="margin-top:14px">Aantal rotors</label>
+      <select id="nrotors" onchange="build_rows();update_info()" style="width:auto;margin-bottom:0">
+        <option value="1">1 rotor</option>
+        <option value="3" selected>3 rotors</option>
+        <option value="5">5 rotors</option>
+      </select>
+
+      <div id="rotor-rows" style="margin-top:14px"></div>
+
+      <div class="row" style="margin-top:14px">
+        <label class="lbl">Reflector (UKW)</label>
+        <select id="reflector" onchange="update_info()" style="width:auto;margin-bottom:0">
+          <option value="B" selected>UKW-B</option>
+          <option value="C">UKW-C</option>
+        </select>
+        <label class="lbl" for="plugboard" style="margin-left:20px">Stekkerbord <small style="text-transform:none;font-weight:400">(bekend, optioneel)</small></label>
+        <input type="text" id="plugboard" value="" oninput="update_info()" placeholder="geen" style="width:140px;margin-bottom:0">
+      </div>
+
+      <div class="row" style="margin-top:18px">
+        <button class="btn" onclick="start_bruteforce()">▶ Brute force starten</button>
+        <span id="status" style="align-self:center;color:var(--muted);font-size:14px"></span>
+      </div>
+      <div class="sbar" id="progress" style="margin-top:10px"><div id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="card" id="results-card" style="display:none">
+      <h3 style="margin-top:0">Top 5</h3>
+      <table>
+        <thead><tr><th>startposities</th><th>ontsleuteld (eerste 40)</th><th>score</th></tr></thead>
+        <tbody id="results"></tbody>
+      </table>
+    </div>
+
+    <div class="task" id="toomuch" style="display:none">
+      <h3>🚫 Te veel combinaties</h3>
+      <p style="margin:0" id="toomuch-text"></p>
+    </div>
+
+    <div class="hint">
+      <h4>ℹ️ Zo werkt de score</h4>
+      <p style="margin:0">Zelfde principe als de Caesar- en Vigenère-solvers: veel
+      <span class="mono">e</span>'s → hogere score, veel <span class="mono">x</span>/<span class="mono">y</span>/<span class="mono">q</span> → lagere score.
+      Enigma-teksten hebben geen spaties, dus bij korte ciphertexts is de score minder betrouwbaar —
+      een duidelijk Nederlands woord in de top-1 is dan het echte bewijs.</p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">enigma · brute force op startposities</span>
+  </div>
+
+<script>
+const ROTORS = {
+  I:   {w: "EKMFLGDQVZNTOWYHXUSPAIBRCJ", notch: 16},
+  II:  {w: "AJDKSIRUXBLHWTMCQGZNPYFVOE", notch: 10},
+  III: {w: "BDFHJLCPRTXVZNYEIWGAKMUSQO", notch: 12},
+  IV:  {w: "ESOVPZJAYQUIRHXLNFTGKDCMWB", notch: 21},
+  V:   {w: "VZBRGITYUPSDNHLXAWMJQOFECK", notch: 25}
+};
+const REFL = {
+  B: "YRUHQSLDPXNGOKMIEBFZCWVJAT",
+  C: "FVPJIAOYEDRZXWGCTKUQSBNMHL"
+};
+const INV = {};
+for (const k in ROTORS) {
+  INV[k] = new Array(26);
+  for (let i = 0; i < 26; i++) INV[k][ROTORS[k].w.charCodeAt(i) - 65] = i;
+}
+
+function letters_only(s) { return s.toLowerCase().replace(/[^a-z]/g, ""); }
+
+function make_plug(s) {
+  const pm = Array.from({length: 26}, (_, i) => i);
+  const t = s.toUpperCase().replace(/[^A-Z]/g, "");
+  for (let i = 0; i + 1 < t.length; i += 2) {
+    const a = t.charCodeAt(i) - 65, b = t.charCodeAt(i + 1) - 65;
+    if (a !== b) { const t2 = pm[a]; pm[a] = pm[b]; pm[b] = t2; }
+  }
+  return pm;
+}
+
+function enigma_decode(ct, rotors, refl, starts, rings, plug) {
+  const pm = make_plug(plug || "");
+  const n = rotors.length;
+  if (typeof starts !== "string") starts = starts.join("");
+  if (typeof rings !== "string") rings = rings.join("");
+  starts = starts.toLowerCase();
+  rings = rings.toLowerCase();
+  const pos = [...starts].map(c => c.charCodeAt(0) - 97);
+  const ring = [...rings].map(c => c.charCodeAt(0) - 97);
+  const wires = rotors.map(r => ROTORS[r].w);
+  const invs  = rotors.map(r => INV[r]);
+  const notch = rotors.map(r => ROTORS[r].notch);
+  const refl_s = REFL[refl];
+  let out = "";
+  for (const ch of letters_only(ct)) {
+    let x = pm[ch.charCodeAt(0) - 97];
+    const mid_at  = n >= 2 && pos[n - 2] === notch[n - 2];
+    const right_at = n >= 2 && pos[n - 1] === notch[n - 1];
+    pos[n - 1] = (pos[n - 1] + 1) % 26;
+    if (mid_at) {
+      pos[n - 2] = (pos[n - 2] + 1) % 26;
+      if (n > 2) pos[n - 3] = (pos[n - 3] + 1) % 26;
+    } else if (right_at) {
+      pos[n - 2] = (pos[n - 2] + 1) % 26;
+    }
+    for (let i = n - 1; i >= 0; i--) {
+      const off = (pos[i] - ring[i] + 26) % 26;
+      x = (wires[i].charCodeAt((x + off) % 26) - 65 - off + 52) % 26;
+    }
+    x = refl_s.charCodeAt(x) - 65;
+    for (let i = 0; i < n; i++) {
+      const off = (pos[i] - ring[i] + 26) % 26;
+      x = (invs[i][(x + off) % 26] - off + 52) % 26;
+    }
+    out += String.fromCharCode(pm[x] + 97);
+  }
+  return out;
+}
+
+function plaintext_score(plaintext) {
+  var score = 0;
+  for (var i = 0; i < plaintext.length; i++) {
+    var ch = plaintext.charAt(i);
+    if (ch === 'e') score += 1;
+    if (ch === ' ') score += 1;
+    if (ch === 'x') score -= 1;
+    if (ch === 'y') score -= 1;
+    if (ch === 'q') score -= 1;
+  }
+  return score / Math.max(1, plaintext.length);
+}
+
+let rotor_names = ["I","II","III"];
+let topResults = [];
+function build_rows() {
+  const n = parseInt(document.getElementById("nrotors").value, 10);
+  const box = document.getElementById("rotor-rows");
+  const prev = rotor_names.slice(0, n);
+  while (prev.length < n) prev.push(["I","II","III","IV","V"][prev.length]);
+  rotor_names = prev.slice(0, n);
+  const labels = n === 1 ? ["rechter"] : n === 3 ? ["links","midden","rechts"] : ["1 (links)","2","3","4","5 (rechts)"];
+  let html = `<table style="min-width:600px"><tr><th style="width:90px">positie</th><th>rotor</th><th>start (a–z)</th><th>ring (a–z)</th><th style="width:120px">start onbekend?</th></tr>`;
+  rotor_names.forEach((r, i) => {
+    let opts = "";
+    for (const rr of ["I","II","III","IV","V"]) {
+      const other = rotor_names.filter((x, j) => x === rr && j !== i).length > 0;
+      opts += `<option value="${rr}" ${other ? "disabled" : ""}>rotor ${rr}</option>`;
+    }
+    html += `<tr>
+      <td class="mono">${labels[i]}</td>
+      <td><select onchange="on_rotor_change(${i}, this.value)" style="width:auto;margin:0">${opts}</select></td>
+      <td><input type="text" id="sstart${i}" value="a" maxlength="1" oninput="update_info()" style="width:52px;margin:0;text-transform:lowercase"></td>
+      <td><input type="text" id="sring${i}" value="a" maxlength="1" oninput="update_info()" style="width:52px;margin:0;text-transform:lowercase"></td>
+      <td><label style="display:flex;gap:7px;align-items:center;font-size:14px;cursor:pointer">
+        <input type="checkbox" id="sunk${i}" onchange="update_info()"> onbekend</label></td>
+    </tr>`;
+  });
+  html += `</table>`;
+  box.innerHTML = html;
+  rotor_names.forEach((r, i) => { box.querySelectorAll("select")[i].value = r; });
+}
+function on_rotor_change(i, v) { rotor_names[i] = v; build_rows(); update_info(); }
+
+function n_unknown() {
+  return rotor_names.map((_, i) => document.getElementById("sunk" + i).checked).filter(Boolean).length;
+}
+function update_info() {
+  const nu = n_unknown();
+  const total = Math.pow(26, nu);
+  const status = document.getElementById("status");
+  const toomuch = document.getElementById("toomuch");
+  document.getElementById("toomuch-text").innerHTML =
+    `${nu} onbekende startposities = <b>${total.toLocaleString("nl-NL")}</b> combinaties — dat is te veel voor een browser. ` +
+    `Dat is <i>nauwkeurig</i> waarom de Enigma zo lang onbreekbaar leek. Lees <a href="enigma_kraken.html">hoe men er in de praktijk omheen ging</a>.`;
+  toomuch.style.display = total > 17576 ? "" : "none";
+  status.textContent = total > 17576 ? "" : `${total.toLocaleString("nl-NL")} combinaties`;
+}
+
+function start_bruteforce() {
+  const ct = letters_only(document.getElementById("ciphertext").value);
+  if (ct.length < 8) { document.getElementById("status").textContent = "Geef een lang genoeg ciphertext (min. 8 letters)."; return; }
+  const nu = n_unknown();
+  const total = Math.pow(26, nu);
+  if (total > 17576) { update_info(); return; }
+
+  const rotors = rotor_names.slice();
+  const refl = document.getElementById("reflector").value;
+  const plug = document.getElementById("plugboard").value;
+  const rings = rotor_names.map((_, i) => (document.getElementById("sstart" + i).value || "a").toLowerCase().slice(-1) || "a");
+  // ring = start bij bekende rotors; onbekende rotors krijgen ring 'a'
+  const known = rotor_names.map((_, i) => !document.getElementById("sunk" + i).checked);
+  const rd = (id, i) => (document.getElementById(id + i).value || "a").toLowerCase().slice(-1) || "a";
+  // bekende rotor: gebruik ingetypte start + ring; onbekende rotor: brute force start, ring 'a'
+  const starts_known = rotor_names.map((_, i) => known[i] ? rd("sstart", i) : "a");
+  const rings_final  = rotor_names.map((_, i) => known[i] ? rd("sring", i) : "a");
+
+  topResults = [];
+  let idx = 0;
+  const n = rotors.length;
+  const combos = [];
+  (function gen(i, cur) {
+    if (i === n) { combos.push(cur.join("")); return; }
+    if (known[i]) { gen(i + 1, cur.concat(starts_known[i])); }
+    else {
+      for (let c = 0; c < 26; c++) gen(i + 1, cur.concat(String.fromCharCode(97 + c)));
+    }
+  })(0, []);
+
+  const CHUNK = 400;
+  function step() {
+    const end = Math.min(combos.length, idx + CHUNK);
+    for (; idx < end; idx++) {
+      const pt = enigma_decode(ct, rotors, refl, combos[idx], rings_final, plug);
+      const s = plaintext_score(pt);
+      topResults.push({starts: combos[idx], pt, s});
+      topResults.sort((a, b) => b.s - a.s);
+      if (topResults.length > 5) topResults.pop();
+    }
+    document.getElementById("progress-fill").style.width = (100 * idx / combos.length).toFixed(1) + "%";
+    render_top();
+    if (idx < combos.length) {
+      setTimeout(step, 0);
+    } else {
+      document.getElementById("status").textContent = `Klaar: ${total.toLocaleString("nl-NL")} combinaties beproefd.`;
+    }
+  }
+  document.getElementById("results-card").style.display = "";
+  document.getElementById("status").textContent = "Bezig…";
+  step();
+}
+
+function render_top() {
+  const tb = document.getElementById("results");
+  tb.innerHTML = topResults.map((r, i) =>
+    `<tr${i === 0 ? ' class="best"' : ''}><td class="mono">${r.starts}</td><td class="mono">${r.pt.slice(0, 40)}</td><td>${r.s.toFixed(3)}</td></tr>`
+  ).join("");
+}
+build_rows();
+update_info();
+</script>
+</body>
+</html>

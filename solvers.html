@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Solvers — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a class="active" href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Solvers</h1>
+      <p>
+        Alle aanvallen op één plek: plak een ciphertext, laat de tool denken,
+        en bekijk wat frequentie-analyse en brute force voor je kunnen.
+      </p>
+    </div>
+
+    <div class="grid">
+      <a class="tile" href="solver_caesar.html">
+        <span class="t">Caesar-solver <span class="arrow">→</span></span>
+        <span class="d">Alle 26 verschuivingen tegelijk, met score per verschuiving. De beste gok wordt gemarkeerd. Werkt het best met voldoende ciphertext.</span>
+      </a>
+      <a class="tile" href="solver_vigenere.html">
+        <span class="t">Vigenère-solver <span class="arrow">→</span></span>
+        <span class="d">Raadt eerst de sleutellengte (index of coincidence, met band-detectie bij veelvouden) en daarna per positie de sleutel-letter.</span>
+      </a>
+      <a class="tile" href="solver_enigma.html">
+        <span class="t">Enigma-solver <span class="arrow">→</span></span>
+        <span class="d">Brute force op de startposities van de rotors (tot 3 onbekende rotors = 17.576 combinaties). Meer onbekende starts? Dan zie je precies waarom de Enigma "onbreekbaar" leek.</span>
+      </a>
+      <a class="tile" href="frequency.html">
+        <span class="t">Letterfrequentie <span class="arrow">→</span></span>
+        <span class="d">Geen solver in de eigenlijke zin, maar de brandstof ervan: frequentie-grafiek van je tekst, optioneel vergeleken met gemiddeld Nederlands.</span>
+      </a>
+    </div>
+
+    <div class="task" style="margin-top:26px">
+      <h3>🧠 Hoe de solvers werken (in één zin)</h3>
+      <p style="margin:0">
+        Klassieke ciphers verbergen letters, maar niet hun <b>frequentie</b>.
+        Wie de verwachte Nederlandse letterverdeling kent, kan elke kandidaat-ontsleuteling
+        scoren — en de echte plaintext scoret het hoogst.
+      </p>
+    </div>
+
+    <div class="divider"></div>
+    <p style="color:var(--muted)">
+      Geen ciphertext om te kraken? Neem er een van de
+      <a href="index.html#opgaven">opgaven</a> — of versleutel je eigen tekst met de
+      <a href="caesar.html">Caesar</a>-, <a href="vigenere.html">Vigenère</a>- of
+      <a href="enigma.html">Enigma</a>-tool.
+    </p>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">caesar · vigenère · enigma · frequentie</span>
+  </div>
+</body>
+</html>

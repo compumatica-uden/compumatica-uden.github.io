@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline'">
+  <title>Vigenère-solver — Compumatica</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="inner">
+      <a class="logo" href="index.html"><img src="compumatica_logo.png" alt="Compumatica" height="34"></a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="caesar.html">Caesar</a>
+        <a href="vigenere.html">Vigenère</a>
+        <a href="railfence.html">Rail fence</a>
+        <a href="enigma.html">Enigma</a>
+        <a class="active" href="solvers.html">Solvers</a>
+        <a href="index.html#opgaven">Opgaven</a>
+      </nav>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <h1>Vigenère-solver</h1>
+      <p>
+        Kraak een Vigenère-ciphertext in twee stappen:
+        <b>(1)</b> vind de sleutellengte met de <i>index of coincidence</i>, en
+        <b>(2)</b> laat de solver per positie de beste sleutel-letter raden
+        (elke positie is eigenlijk maar een Caesar-cijfer).
+      </p>
+    </div>
+
+    <div class="card">
+      <label class="lbl" for="ciphertext">Ciphertext</label>
+      <textarea cols="40" rows="6" id="ciphertext" oninput="do_crypto();">hjmjmlrbiwromxmtismzpfegmjxognbwiwmtreuxiwmzysmyieutqexfeprb</textarea>
+
+      <div class="row" style="margin-top:6px">
+        <div style="max-width:220px">
+          <label class="lbl" for="key_len">Sleutellengte</label>
+          <input type="number" id="key_len" min="1" max="40" value="4" oninput="do_crypto();">
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn" onclick="detect_length()">🔍 Zoek lengte (index of coincidence)</button>
+        </div>
+      </div>
+
+      <div id="ic_chart" style="margin-top:14px"></div>
+
+      <div class="row" style="margin-top:14px;align-items:stretch">
+        <div style="flex:0 0 auto;max-width:230px">
+          <label class="lbl">Sleutel (geraad)</label>
+          <div class="outbox" id="key_guess" style="font-size:22px;letter-spacing:.35em"></div>
+        </div>
+        <div class="grow" style="flex:1 1 300px">
+          <label class="lbl">Plaintext</label>
+          <div class="outbox" id="plaintext"></div>
+        </div>
+      </div>
+
+      <label class="lbl" style="margin-top:20px">Per sleutel-positie</label>
+      <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:var(--panel2)">
+        <table>
+          <thead><tr><th>positie</th><th>subtekst</th><th>beste letter</th><th>score</th></tr></thead>
+          <tbody id="positions"></tbody>
+        </table>
+      </div>
+      <p style="color:var(--muted);font-size:13.5px;margin:10px 0 0">
+        De solver probeert per positie alle 26 verschuivingen en kiest de hoogste score
+        (veel <span class="mono">e</span>/spaties, weinig <span class="mono">x y q</span>).
+        Sinds kort kan er per positie <b>meerdere</b> redelijke kandidaten zijn —
+        probeer die varianten totdat de plaintext zinvol is.
+      </p>
+    </div>
+
+    <div class="task">
+      <h3>📖 Zo gebruik je hem</h3>
+      <p style="margin:0">
+        Plak een ciphertext (de demo hierboven is versleuteld met een 4-letters sleutel) en
+        druk op <b>🔍 Zoek lengte</b>: de grafiek toont de index of coincidence per lengte.
+        Groene balken = de band van redelijke kandidaten; piekt die bij veelvouden
+        van een getal, dan is dat getal de echte lengte. Vul de lengte in en lees
+        per positie de geraadde sleutel-letter af.
+        Oefenen? Neem de <a href="vigenere.html#uitdaging">uitdaging op de Vigenère-pagina</a> (sleutel van 3 letters) of de
+        <a href="vigenere.html#uitdaging2">uitdaging met onbekende lengte</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>compumatica · crypto</span>
+    <span class="mono" style="margin-left:auto">vigenère · index of coincidence</span>
+  </div>
+
+  <script>
+    function vigenere_decrypt(ct, key){
+      var A = "a".charCodeAt(0);
+      var out = "";
+      for (var i = 0; i < ct.length; i++){
+        var j = (key.length + i) % key.length;
+        var c = 1 + ct.charCodeAt(i) - A;
+        var k = 1 + key.charCodeAt(j) - A;
+        if (c >= 27 || c < 1) c = 0;
+        if (k >= 27 || k < 1) k = 0;
+        c = (c + 54 - k) % 27;
+        out += (c === 0) ? " " : String.fromCharCode(c - 1 + A);
+      }
+      return out;
+    }
+
+    function plaintext_score(plaintext){
+      var score = 0;
+      for (var i = 0; i < plaintext.length; i++){
+        var ch = plaintext.charAt(i);
+        if (ch === 'e') score += 1;
+        if (ch === ' ') score += 1;
+        if (ch === 'x') score -= 1;
+        if (ch === 'y') score -= 1;
+        if (ch === 'q') score -= 1;
+      }
+      return score / Math.max(1, plaintext.length);
+    }
+
+    /* index of coincidence voor een subtekst (enkel letters) */
+    function ic_of(sub){
+      var cnt = {}, n = 0;
+      for (var i = 0; i < sub.length; i++){
+        var c = sub.charAt(i);
+        if (c >= "a" && c <= "z"){ cnt[c] = (cnt[c] || 0) + 1; n++; }
+      }
+      if (n < 6) return null;
+      var s = 0;
+      for (var k in cnt) s += cnt[k] * (cnt[k] - 1);
+      return s / (n * (n - 1));
+    }
+
+    function ic_for_length(ct, L){
+      var subs = [];
+      for (var i = 0; i < L; i++){
+        var s = "";
+        for (var j = i; j < ct.length; j += L) s += ct.charAt(j);
+        subs.push(s);
+      }
+      var total = 0, ok = true;
+      for (var i = 0; i < L; i++){
+        var v = ic_of(subs[i]);
+        if (v === null){ ok = false; break; }
+        total += v;
+      }
+      return ok ? total / L : null;
+    }
+
+    function detect_length(){
+      var ct = document.getElementById("ciphertext").value.toLowerCase();
+      var chart = document.getElementById("ic_chart");
+      if (ct.replace(/[^a-z]/g, "").length < 30){
+        chart.innerHTML = '<p style="color:var(--muted);margin:0">Te weinig tekst voor een betrouwbare IC (min. ~30 letters).</p>';
+        return;
+      }
+      var values = [];
+      for (var L = 1; L <= 12; L++) values.push([L, ic_for_length(ct, L)]);
+      var max = 0;
+      values.forEach(function(v){ if (v[1] !== null && v[1] > max) max = v[1]; });
+      /* de IC piekt bij de ware lengte én bij veelvouden ervan.
+         Neem daarom de kleinste lengte in de "band" (>= 85% van de max),
+         mits alle bandlengtes veelvouden ervan zijn. */
+      var band = [];
+      values.forEach(function(v){ if (v[1] !== null && v[1] >= 0.85 * max) band.push(v[0]); });
+      band.sort(function(a, b){ return a - b; });
+      var bestL = 1;
+      values.forEach(function(v){ if (v[1] === max) bestL = v[0]; });
+      var suggested = bestL, isMultiple = false;
+      if (band.length > 1){
+        var sm = band[0], allMult = true;
+        for (var i = 1; i < band.length; i++) if (band[i] % sm !== 0) allMult = false;
+        if (allMult){ suggested = sm; isMultiple = true; }
+      }
+      var html = '<label class="lbl">Index of coincidence per hypothetische lengte ' +
+                 '<span style="text-transform:none;font-weight:400">(piek → ware lengte of een veelvoud ervan; Nederlands ≈ 0.067, willekeurig ≈ 0.038)</span></label>';
+      html += '<div style="max-width:560px">';
+      values.forEach(function(v){
+        var L = v[0], val = v[1];
+        var pct = val === null ? 0 : Math.round(100 * val / 0.09);
+        var inband = val !== null && val >= 0.85 * max;
+        html += '<div class="freq-row" style="grid-template-columns:44px 1fr 60px">' +
+                '<span class="letter">' + L + '</span>' +
+                '<div class="track"><div class="fill" style="width:' + pct + '%;' +
+                  (inband ? 'background:linear-gradient(90deg,#059669,#34d399);' : '') +
+                  (L === suggested ? 'box-shadow:0 0 8px rgba(52,211,153,.6)' : '') +
+                  '"></div></div>' +
+                '<span class="nums">' + (val === null ? "—" : val.toFixed(3)) + (L === suggested ? " ★" : "") + '</span></div>';
+      });
+      html += '</div>';
+      var bandStr = band.join(", ");
+      var note = isMultiple
+        ? 'De IC piekt bij lengtes ' + bandStr + ' — veelvouden van elkaar. De kleinste, <b style="color:var(--good)">' + suggested + '</b>, is de meest waarschijnlijke sleutellengte.'
+        : 'De IC piekt bij lengte <b style="color:var(--good)">' + suggested + '</b>.';
+      html += '<p style="color:var(--muted);font-size:14px;margin:10px 0 0">' + note + '</p>' +
+              '<button class="btn" style="margin-top:6px" onclick="use_length(' + suggested + ')">Gebruik lengte ' + suggested + '</button>';
+      chart.innerHTML = html;
+    }
+
+    function use_length(L){
+      document.getElementById("key_len").value = L;
+      do_crypto();
+    }
+
+    function do_crypto(){
+      var ct = document.getElementById("ciphertext").value.toLowerCase();
+      var L = Number(document.getElementById("key_len").value);
+      if (!ct.trim() || !(L >= 1 && L <= 40)){
+        document.getElementById("key_guess").textContent = "";
+        document.getElementById("plaintext").textContent = "";
+        document.getElementById("positions").innerHTML = "";
+        return;
+      }
+      var key = "", rows = "";
+      for (var pos = 0; pos < L; pos++){
+        var sub = "";
+        for (var j = pos; j < ct.length; j += L) sub += ct.charAt(j);
+        var best_s = -99, best_kc = "?", second_s = -99, second_kc = "";
+        for (var c = 0; c <= 26; c++){
+          var kc = c === 0 ? "-" : String.fromCharCode(c - 1 + "a".charCodeAt(0));
+          var s = plaintext_score(vigenere_decrypt(sub, c === 0 ? "-" : kc));
+          if (s > best_s){
+            if (best_s > second_s){ second_s = best_s; second_kc = best_kc; }
+            best_s = s; best_kc = kc;
+          }
+        }
+        key += best_kc;
+        var note = (second_kc && second_s > best_s - 0.15 && second_kc !== "-")
+          ? ' <span class="dim">(ook ' + second_kc + ' dichtbij)</span>' : "";
+        rows += '<tr><td class="mono">' + (pos + 1) + '</td>' +
+                '<td class="mono" style="max-width:340px;overflow-wrap:anywhere">' + sub + '</td>' +
+                '<td class="mono" style="color:var(--accent);font-weight:700">' + best_kc + '</td>' +
+                '<td>' + best_s.toFixed(2) + note + '</td></tr>';
+      }
+      document.getElementById("key_guess").textContent = key;
+      document.getElementById("plaintext").textContent = vigenere_decrypt(ct, key);
+      document.getElementById("positions").innerHTML = rows;
+    }
+
+    do_crypto();
+  </script>
+</body>
+</html>
